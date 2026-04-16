@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Universal Skills Hub
 
-## Getting Started
+Universal Skills Hub is a directory platform for reusable AI coding-agent skills.
 
-First, run the development server:
+## What it is
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This platform allows developers to discover, share, and use skills designed for AI coding agents such as Claude Code, Cursor, OpenCode, GitHub Copilot, Windsurf, Codex, Gemini CLI, Cline, and Continue.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Search skills by functionality, not by repository name
+- Support for multiple AI coding agents
+- Skills linked to GitHub repositories with installation guides
+- Installation guides for each supported agent
+- Submit new skills from GitHub repositories
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Supported Agents
 
-## Learn More
+Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, Gemini CLI, Cline, Continue
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Universal Skills Hub
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Universal Skills Hub es una plataforma de directorio para habilidades reutilizables de agentes de codificacion con IA.
 
-## Deploy on Vercel
+## Que es
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Esta plataforma permite a los desarrolladores descubrir, compartir y usar habilidades diseñadas para agentes de codificacion con IA como Claude Code, Cursor, OpenCode, GitHub Copilot, Windsurf, Codex, Gemini CLI, Cline y Continue.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Caracteristicas
+
+- Buscar habilidades por funcionalidad, no por nombre de repositorio
+- Soporte para multiples agentes de codificacion con IA
+- Habilidades enlazadas a repositorios de GitHub con guias de instalacion
+- Guias de instalacion para cada agente soportado
+- Enviar nuevas habilidades desde repositorios de GitHub
+
+## Agentes Soportados
+
+Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, Gemini CLI, Cline, Continue
