@@ -57,11 +57,11 @@ async function getSkillsWithStars(skills: Awaited<ReturnType<typeof getDirectory
 
 export default async function Home() {
   const session = await getOptionalSession();
-  const { skills: allSkills } = await getDirectorySkills({ currentUserId: session?.user?.id });
+  const { skills: allSkills, total } = await getDirectorySkills({ currentUserId: session?.user?.id, limit: 6 });
   
   // Only try Skills Directory API if we have an API key configured
   const apiKey = process.env.SKILLS_DIRECTORY_API_KEY;
-  let totalSkills = allSkills.length;
+  let totalSkills = total;
   
   if (apiKey) {
     const apiSkills = await fetchSkillsDirectorySkills({ limit: 1 });

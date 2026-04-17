@@ -25,12 +25,18 @@ export function SkillCard({ skill, isFavorited = skill.isFavorited ?? false, sho
   const visibleTags = skill.tags.filter((tag) => tag !== 'imported').slice(0, 5);
 
   return (
-    <article className="card-hover surface-card group relative flex min-h-[300px] flex-col overflow-hidden rounded-3xl p-5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent opacity-60" />
+    <article
+      suppressHydrationWarning
+      className="card-hover surface-card group relative flex min-h-[300px] flex-col overflow-hidden rounded-3xl p-5"
+    >
+      <div
+        suppressHydrationWarning
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent opacity-60"
+      />
 
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div suppressHydrationWarning className="flex items-start justify-between gap-4">
+        <div suppressHydrationWarning className="min-w-0 flex-1">
+          <div suppressHydrationWarning className="mb-3 flex flex-wrap items-center gap-2">
             {skill.category && (
               <span className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-cyan)]">
                 {skill.category}
@@ -75,7 +81,7 @@ export function SkillCard({ skill, isFavorited = skill.isFavorited ?? false, sho
         )}
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div suppressHydrationWarning className="mt-5 flex flex-wrap gap-2">
         {visibleAgents.map((agent) => (
           <Link
             key={agent}
@@ -93,7 +99,7 @@ export function SkillCard({ skill, isFavorited = skill.isFavorited ?? false, sho
       </div>
 
       {visibleTags.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-1.5">
+        <div suppressHydrationWarning className="mt-4 flex flex-wrap gap-1.5">
           {visibleTags.map((tag) => (
             <span key={tag} className="text-[11px] text-[var(--text-muted)]">
               #{tag}
@@ -102,12 +108,18 @@ export function SkillCard({ skill, isFavorited = skill.isFavorited ?? false, sho
         </div>
       )}
 
-      <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-4">
-        <div className="inline-flex items-center gap-2 font-mono text-xs text-[var(--text-muted)]">
+      <div
+        suppressHydrationWarning
+        className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-4"
+      >
+        <div
+          suppressHydrationWarning
+          className="inline-flex items-center gap-2 font-mono text-xs text-[var(--text-muted)]"
+        >
           <Terminal className="h-3.5 w-3.5" />
           {skill.favoriteCount ?? 0} {(skill.favoriteCount ?? 0) === 1 ? 'save' : 'saves'}
         </div>
-        <div className="flex items-center gap-3">
+        <div suppressHydrationWarning className="flex items-center gap-3">
           {skill.repositoryUrl && (
             <a
               href={skill.repositoryUrl}

@@ -54,6 +54,7 @@ export function PlatformFilter({ className }: PlatformFilterProps) {
       params.delete('agents');
     }
 
+    params.delete('page');
     pushParams(params);
   };
 
@@ -66,6 +67,7 @@ export function PlatformFilter({ className }: PlatformFilterProps) {
       params.set('category', category);
     }
 
+    params.delete('page');
     pushParams(params);
   };
 
@@ -73,13 +75,14 @@ export function PlatformFilter({ className }: PlatformFilterProps) {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('agents');
     params.delete('category');
+    params.delete('page');
     pushParams(params);
   };
 
   return (
-    <div className={className}>
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
+    <div suppressHydrationWarning className={className}>
+      <div suppressHydrationWarning className="mb-5 flex items-center justify-between gap-3">
+        <div suppressHydrationWarning>
           <h3 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-[var(--text-primary)]">
             Filters
           </h3>
@@ -93,10 +96,10 @@ export function PlatformFilter({ className }: PlatformFilterProps) {
         )}
       </div>
 
-      <div className="space-y-6">
+      <div suppressHydrationWarning className="space-y-6">
         <section>
           <h4 className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Agents</h4>
-          <div className="space-y-2">
+          <div suppressHydrationWarning className="space-y-2">
             {AGENTS.map((agent) => (
               <label key={agent.id} className="group flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 transition-colors hover:border-cyan-300/25 hover:bg-cyan-300/5">
                 <Checkbox.Root
@@ -118,7 +121,7 @@ export function PlatformFilter({ className }: PlatformFilterProps) {
 
         <section>
           <h4 className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Categories</h4>
-          <div className="flex flex-wrap gap-2">
+          <div suppressHydrationWarning className="flex flex-wrap gap-2">
             {CATEGORY_OPTIONS.map((category) => {
               const active = selectedCategory === category;
               return (

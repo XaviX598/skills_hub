@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 const phrases = [
   'Find the right skill for your agent',
@@ -13,10 +13,10 @@ type Phase = 'typing' | 'waiting' | 'deleting';
 export function TypewriterTitle() {
   const [text, setText] = useState('');
   const [phase, setPhase] = useState<Phase>('typing');
-  const indexRef = useRef(0);
+  const [phraseIndex, setPhraseIndex] = useState(0);
 
   useEffect(() => {
-    const phrase = phrases[indexRef.current];
+    const phrase = phrases[phraseIndex];
     
     if (phase === 'typing') {
       if (text.length < phrase.length) {
@@ -37,17 +37,18 @@ export function TypewriterTitle() {
         return () => clearTimeout(timer);
       } else {
         // Done deleting, move to next phrase
-        indexRef.current = (indexRef.current + 1) % phrases.length;
-        setPhase('typing');
+        const timer = setTimeout(() => {
+          setPhraseIndex((current) => (current + 1) % phrases.length);
+          setPhase('typing');
+        }, 0);
+        return () => clearTimeout(timer);
       }
     }
-  }, [text, phase]);
+  }, [text, phase, phraseIndex]);
 
   const renderText = () => {
-    const currentIndex = indexRef.current;
-    
     // Check for "Claude, Cursor & more" FIRST (most specific) - only for phrase 2
-    if (currentIndex === 2 && text.includes('Claude, Cursor & more')) {
+    if (phraseIndex === 2 && text.includes('Claude, Cursor & more')) {
       const parts = text.split('Claude, Cursor & more');
       return (
         <>
@@ -59,7 +60,7 @@ export function TypewriterTitle() {
     }
     
     // Check for "MCP servers" - only for phrase 1
-    if (currentIndex === 1 && text.includes('MCP servers')) {
+    if (phraseIndex === 1 && text.includes('MCP servers')) {
       const parts = text.split('MCP servers');
       return (
         <>
@@ -71,7 +72,7 @@ export function TypewriterTitle() {
     }
     
     // Check for "skill" - only for phrase 0
-    if (currentIndex === 0 && text.includes('skill')) {
+    if (phraseIndex === 0 && text.includes('skill')) {
       const parts = text.split('skill');
       return (
         <>

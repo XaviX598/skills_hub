@@ -181,7 +181,7 @@ export async function getCombinedSkills(options: {
   limit?: number;
   currentUserId?: string;
 } = {}): Promise<{ skills: Skill[]; sources: string[] }> {
-  const { localSkills = [], query, category, limit = 50, currentUserId } = options;
+  const { localSkills = [], query, category, limit = 50 } = options;
   
   const sources: string[] = [];
   let allSkills: Skill[] = [...localSkills];

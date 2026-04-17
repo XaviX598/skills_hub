@@ -7,7 +7,6 @@ import geminicliImage from '../../public/images/geminicli.svg';
 import clineImage from '../../public/images/cline.svg';
 import githubCopilotImage from '../../public/images/github-copilot.svg';
 import codexImage from '../../public/images/codex.svg';
-import type { StaticImageData } from 'next/image';
 
 export const AGENTS: AgentDefinition[] = [
   {

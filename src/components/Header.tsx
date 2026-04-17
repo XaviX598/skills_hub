@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signOut } from '@/lib/auth';
 import { getOptionalSession } from '@/lib/session';
-import { LogIn, LogOut, Plus, Sparkles, User, Search, BookOpen, Code2 } from 'lucide-react';
+import { LogIn, LogOut, Plus, Sparkles, User, Search, BookOpen } from 'lucide-react';
 
 interface HeaderProps {
   className?: string;

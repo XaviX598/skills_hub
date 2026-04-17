@@ -1,4 +1,4 @@
-﻿import type { Skill } from '@/types';
+import type { Skill } from '@/types';
 import { IMPORTED_SKILLS } from './imported-skills';
 
 const CURATED_SKILLS: Skill[] = [
@@ -99,9 +99,11 @@ const CURATED_SKILLS: Skill[] = [
   },
 ];
 
-const curatedKeys = new Set(CURATED_SKILLS.map((skill) => `${skill.owner}/${skill.repoName}/${skill.name}`));
+const curatedKeys = new Set(
+  CURATED_SKILLS.map((skill) => `${skill.repositoryUrl}::${skill.name.toLowerCase()}`),
+);
 const importedWithoutCuratedDuplicates = IMPORTED_SKILLS.filter(
-  (skill) => !curatedKeys.has(`${skill.owner}/${skill.repoName}/${skill.name}`),
+  (skill) => !curatedKeys.has(`${skill.repositoryUrl}::${skill.name.toLowerCase()}`),
 );
 
 export const FEATURED_SKILLS: Skill[] = [...CURATED_SKILLS, ...importedWithoutCuratedDuplicates];
