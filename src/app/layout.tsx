@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import Link from "next/link";
@@ -15,9 +14,90 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Universal Skills Hub",
+  "description": "Directory for AI agent skills - Claude Code, OpenCode, Cursor, Codex, MCP. Discover, share, and install reusable skills for AI coding agents.",
+  "url": "https://universal-skills-hub.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://universal-skills-hub.com/skills?query={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  },
+  "about": {
+    "@type": "Thing",
+    "name": "AI Agent Skills",
+    "description": "Reusable instructions, prompts, and workflows for AI coding agents like Claude Code, OpenCode"
+  },
+  "audience": {
+    "@type": "Audience",
+    "name": "Software Developers",
+    "description": "Developers using AI coding assistants"
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "Universal Skills Hub",
+    "url": "https://universal-skills-hub.com"
+  },
+  "inLanguage": ["en"],
+  "license": "https://github.com/xpressdev/universal-skills-hub",
+  "keywords": "AI agent skills, Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, Continue, AI coding, developer skills"
+};
+
 export const metadata: Metadata = {
-  title: "Universal Skills Hub",
+  title: {
+    default: "Universal Skills Hub",
+    template: "%s | Universal Skills Hub",
+  },
   description: "Search, compare, and publish reusable AI agent skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, Gemini CLI, Cline, Continue, and more.",
+  keywords: ["AI agent skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Codex skills", "Windsurf skills", "AI coding agents", "developer skills", "AI instructions"],
+  authors: [{ name: "Xpress Developer" }],
+  creator: "Xpress Developer",
+  publisher: "Universal Skills Hub",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://universal-skills-hub.com",
+    siteName: "Universal Skills Hub",
+    title: "Universal Skills Hub - AI Agent Skills Directory",
+    description: "Search and discover reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, and more.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Universal Skills Hub - AI Agent Skills Directory",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Universal Skills Hub - AI Agent Skills Directory",
+    description: "Discover and install skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue.",
+    creator: "@xpressdev",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": 0,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://universal-skills-hub.com",
+  },
+  other: {
+    "schema:jsonld": JSON.stringify(jsonLd),
+  },
 };
 
 function Footer() {
@@ -40,6 +120,86 @@ function Footer() {
   );
 }
 
+const stripHydrationScript = `
+(function() {
+  var shouldStrip = function(name) {
+    return name === "bis_skin_checked" ||
+           name === "bis_register" ||
+           name.startsWith("bis_") ||
+           name.startsWith("__processed_");
+  };
+
+  var originalSetAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function(name, value) {
+    if (shouldStrip(String(name))) return;
+    return originalSetAttribute.call(this, name, value);
+  };
+
+  var originalSetAttributeNS = Element.prototype.setAttributeNS;
+  Element.prototype.setAttributeNS = function(namespace, name, value) {
+    if (shouldStrip(String(name))) return;
+    return originalSetAttributeNS.call(this, namespace, name, value);
+  };
+
+  var stripElement = function(node) {
+    if (!node || node.nodeType !== 1) return;
+    var attrs = Array.from(node.attributes);
+    for (var i = 0; i < attrs.length; i++) {
+      if (shouldStrip(attrs[i].name)) {
+        node.removeAttribute(attrs[i].name);
+      }
+    }
+  };
+
+  var stripTree = function(root) {
+    if (!root || ![1, 9, 11].includes(root.nodeType)) return;
+    stripElement(root);
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+    var node = walker.nextNode();
+    while (node) {
+      stripElement(node);
+      node = walker.nextNode();
+    }
+  };
+
+  var clean = function() {
+    stripTree(document.documentElement);
+  };
+
+  clean();
+  document.addEventListener("DOMContentLoaded", clean, { once: true });
+  requestAnimationFrame(clean);
+  var interval = window.setInterval(clean, 50);
+
+  var observer = new MutationObserver(function(mutations) {
+    for (var i = 0; i < mutations.length; i++) {
+      var mutation = mutations[i];
+      if (mutation.type === "attributes") {
+        stripElement(mutation.target);
+      }
+      for (var j = 0; j < mutation.addedNodes.length; j++) {
+        stripTree(mutation.addedNodes[j]);
+      }
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+  });
+
+  var stop = function() {
+    clean();
+    window.clearInterval(interval);
+    observer.disconnect();
+  };
+
+  window.addEventListener("load", function() { window.setTimeout(stop, 30000); }, { once: true });
+  window.setTimeout(stop, 30000);
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -51,83 +211,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head />
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <Script id="strip-extension-hydration-attrs" strategy="beforeInteractive">
-          {`
-            (() => {
-              const shouldStrip = (name) =>
-                name === "bis_skin_checked" ||
-                name === "bis_register" ||
-                name.startsWith("bis_") ||
-                name.startsWith("__processed_");
-
-              const originalSetAttribute = Element.prototype.setAttribute;
-              Element.prototype.setAttribute = function(name, value) {
-                if (shouldStrip(String(name))) return;
-                return originalSetAttribute.call(this, name, value);
-              };
-
-              const originalSetAttributeNS = Element.prototype.setAttributeNS;
-              Element.prototype.setAttributeNS = function(namespace, name, value) {
-                if (shouldStrip(String(name))) return;
-                return originalSetAttributeNS.call(this, namespace, name, value);
-              };
-
-              const stripElement = (node) => {
-                if (!node || node.nodeType !== 1) return;
-                for (const attr of Array.from(node.attributes)) {
-                  if (shouldStrip(attr.name)) {
-                    node.removeAttribute(attr.name);
-                  }
-                }
-              };
-
-              const stripTree = (root) => {
-                if (!root || ![1, 9, 11].includes(root.nodeType)) return;
-                stripElement(root);
-                const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-                let node = walker.nextNode();
-                while (node) {
-                  stripElement(node);
-                  node = walker.nextNode();
-                }
-              };
-
-              const clean = () => stripTree(document.documentElement);
-
-              clean();
-              document.addEventListener("DOMContentLoaded", clean, { once: true });
-              requestAnimationFrame(clean);
-              const interval = window.setInterval(clean, 50);
-
-              const observer = new MutationObserver((mutations) => {
-                for (const mutation of mutations) {
-                  if (mutation.type === "attributes") {
-                    stripElement(mutation.target);
-                  }
-                  for (const node of mutation.addedNodes) {
-                    stripTree(node);
-                  }
-                }
-              });
-
-              observer.observe(document.documentElement, {
-                attributes: true,
-                childList: true,
-                subtree: true,
-              });
-
-              const stop = () => {
-                clean();
-                window.clearInterval(interval);
-                observer.disconnect();
-              };
-
-              window.addEventListener("load", () => window.setTimeout(stop, 30000), { once: true });
-              window.setTimeout(stop, 30000);
-            })();
-          `}
-        </Script>
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: stripHydrationScript }}
+        />
         <Header />
         {children}
         <Footer />

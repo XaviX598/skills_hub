@@ -2,6 +2,7 @@
  * Landing page.
  */
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Search, Sparkles, Star } from 'lucide-react';
@@ -12,6 +13,17 @@ import { AGENTS } from '@/data/agents';
 import { SkillCard } from '@/components/SkillCard';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
 import { TypewriterTitle } from '@/components/TypewriterTitle';
+
+export const metadata: Metadata = {
+  title: "Universal Skills Hub - AI Agent Skills Directory",
+  description: "Discover, search, and install reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue. Browse thousands of skills for AI coding agents.",
+  keywords: ["AI agent skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Codex skills", "Windsurf skills", "AI coding agents", "Cline skills", "Continue skills", "developer skills"],
+  openGraph: {
+    title: "Universal Skills Hub - AI Agent Skills Directory",
+    description: "Discover and install reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue.",
+    type: "website",
+  },
+};
 
 // Filter agents for carousel (exclude continue)
 const CAROUSEL_AGENTS = AGENTS.filter(a => a.id !== 'continue');

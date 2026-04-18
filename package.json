@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "import:skills": "tsx scripts/import-skills.ts",
+    "import:skillful-db": "tsx scripts/import-skillful-db.ts",
     "import:skills-sh": "tsx scripts/import-skills-sh.ts",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",

@@ -1,7 +1,8 @@
-﻿/**
+/**
  * Skill detail page.
  */
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Copy, ExternalLink, Heart, PackageCheck } from 'lucide-react';
@@ -11,9 +12,39 @@ import { toggleFavorite } from '@/app/actions/favorite';
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
 import { getAgentName } from '@/data/agents';
+import type { AgentId } from '@/types';
 
 interface SkillPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: SkillPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const skill = await getSkillById(id);
+
+  if (!skill) {
+    return {
+      title: "Skill Not Found",
+      description: "The requested skill could not be found in the directory.",
+    };
+  }
+
+  // Get agent names for keywords
+  const agentList = skill.agents || [];
+  const supportedAgents = agentList.map((agentId: AgentId) => getAgentName(agentId) || agentId).join(', ') || 'Multiple AI Agents';
+  const category = skill.category || 'AI Agent Skills';
+
+  return {
+    title: `${skill.name} - AI Agent Skill for ${supportedAgents}`,
+    description: skill.description || `${skill.name} - AI agent skill compatible with ${supportedAgents}. ${skill.category ? `Category: ${skill.category}.` : ''} Install and use this skill in your AI coding agent.`,
+    keywords: [skill.name, category, 'AI agent skill', supportedAgents, 'Claude Code skill', 'OpenCode skill', 'MCP skill'],
+    openGraph: {
+      title: `${skill.name} - AI Agent Skill`,
+      description: skill.description || `${skill.name} compatible with ${supportedAgents}`,
+      type: "article",
+      tags: [skill.category || 'AI Skills'],
+    },
+  };
 }
 
 export default async function SkillPage({ params }: SkillPageProps) {

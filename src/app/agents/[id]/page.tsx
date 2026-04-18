@@ -1,10 +1,56 @@
-﻿import Link from 'next/link';
+﻿import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink, Terminal } from 'lucide-react';
 import { getAgentById } from '@/data/agents';
 
 interface AgentPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: AgentPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const agent = getAgentById(id);
+
+  if (!agent) {
+    return {
+      title: "Agent Not Found",
+      description: "The requested AI coding agent could not be found.",
+    };
+  }
+
+  const installKeywords = `install ${agent.name}, setup ${agent.name}, how to use ${agent.name}, ${agent.name} skills, ${agent.name} configuration`;
+  const competitiveKeywords = getCompetitiveKeywords(agent.name);
+
+  return {
+    title: `${agent.name} Installation Guide - How to Install and Use ${agent.name}`,
+    description: `Learn how to install and use ${agent.name}. Step-by-step guide: ${agent.installSummary}. ${agent.vendor} provides AI coding capabilities.`,
+    keywords: [installKeywords, competitiveKeywords, 'AI coding agent', 'developer tools', 'code assistant'],
+    openGraph: {
+      title: `${agent.name} Installation Guide - Setup ${agent.name}`,
+      description: `Complete guide to install and configure ${agent.name}. Learn how to add skills and use AI coding capabilities.`,
+      type: "website",
+    },
+    alternates: {
+      canonical: `https://universal-skills-hub.com/agents/${id}`,
+    },
+  };
+}
+
+function getCompetitiveKeywords(agentName: string): string {
+  const keywords: Record<string, string> = {
+    'claude-code': 'Claude Code, Anthropic Claude, Claude AI',
+    'opencode': 'OpenCode AI, Cursor alternative, Windsurf alternative',
+    'cursor': 'Cursor AI, Copilot alternative, code completion',
+    'windsurf': 'Windsurf AI, Codeium Windsurf, AI coding',
+    'github-copilot': 'GitHub Copilot, Copilot, Microsoft Copilot',
+    'codex': 'OpenAI Codex, Codex CLI, AI CLI',
+    'gemini-cli': 'Google Gemini CLI, Gemini AI, Bard CLI',
+    'cline': 'Cline, Cline AI, VS Code AI',
+    'continue': 'Continue AI, Continue GPT',
+    'mcp': 'MCP, Model Context Protocol, Anthropic MCP',
+  };
+  return keywords[agentName.toLowerCase()] || '';
 }
 
 export default async function AgentPage({ params }: AgentPageProps) {

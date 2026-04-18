@@ -1,6 +1,18 @@
-﻿import Link from 'next/link';
+﻿import type { Metadata } from 'next';
+import Link from 'next/link';
 import { ArrowRight, BookOpen, ShieldCheck } from 'lucide-react';
 import { AGENTS } from '@/data/agents';
+
+export const metadata: Metadata = {
+  title: "AI Coding Agents Guide - Install Claude Code, OpenCode, Cursor, Codex",
+  description: "Step-by-step installation guides for Claude Code, OpenCode, Cursor, Windsurf, GitHub Copilot, Codex, Gemini CLI, Cline, Continue. Learn how to install and configure each AI coding agent.",
+  keywords: ["install Claude Code", "setup OpenCode", "Cursor installation", "Windsurf setup", "Codex guide", "MCP installation", "AI coding agents", "Claude Code setup", "AI agent guide"],
+  openGraph: {
+    title: "AI Coding Agents Guide - Install Claude Code, OpenCode, Cursor, Codex",
+    description: "Step-by-step installation guides for Claude Code, OpenCode, Cursor, Windsurf, GitHub Copilot, Codex, Gemini CLI, Cline, Continue.",
+    type: "website",
+  },
+};
 
 export default function AgentsPage() {
   return (

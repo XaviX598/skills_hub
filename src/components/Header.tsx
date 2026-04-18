@@ -6,7 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signOut } from '@/lib/auth';
 import { getOptionalSession } from '@/lib/session';
-import { LogIn, LogOut, Plus, Sparkles, User, Search, BookOpen } from 'lucide-react';
+import { AGENTS } from '@/data/agents';
+import { ArrowRight, BookOpen, ChevronDown, LogIn, LogOut, Plus, Search, Sparkles, User } from 'lucide-react';
 
 interface HeaderProps {
   className?: string;
@@ -14,7 +15,6 @@ interface HeaderProps {
 
 const navItems = [
   { href: '/skills', label: 'Directory', icon: Search },
-  { href: '/agents', label: 'Agent installation guides', icon: BookOpen },
 ];
 
 export async function Header({ className }: HeaderProps) {
@@ -47,6 +47,61 @@ export async function Header({ className }: HeaderProps) {
                 </Link>
               );
             })}
+
+            <div className="group/menu relative">
+              <Link
+                href="/agents"
+                className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all duration-200 hover:bg-white/5 hover:text-[var(--accent-cyan)] focus-visible:bg-white/5 focus-visible:text-[var(--accent-cyan)]"
+              >
+                <BookOpen className="h-4 w-4 transition-all duration-200 group-hover/menu:scale-110 group-hover/menu:drop-shadow-[0_0_6px_rgba(0,212,255,0.6)]" />
+                Agent installation guides
+                <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover/menu:rotate-180" />
+              </Link>
+
+              <div className="invisible absolute left-0 top-full z-50 w-[25rem] translate-y-3 pt-3 opacity-0 transition-all duration-200 group-hover/menu:visible group-hover/menu:translate-y-0 group-hover/menu:opacity-100 group-focus-within/menu:visible group-focus-within/menu:translate-y-0 group-focus-within/menu:opacity-100">
+                <div className="overflow-hidden rounded-3xl border border-white/10 bg-[var(--bg-secondary)]/95 p-2 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+                  <div className="border-b border-white/10 px-3 py-2">
+                    <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--accent-cyan)]">
+                      Direct installation guides
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
+                      Pick an agent and jump straight to its setup steps.
+                    </p>
+                  </div>
+
+                  <div className="grid max-h-[70vh] gap-1 overflow-y-auto py-2">
+                    {AGENTS.map((agent) => (
+                      <Link
+                        key={agent.id}
+                        href={`/agents/${agent.id}`}
+                        className="group/agent flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition-all duration-200 hover:bg-white/5 hover:text-white focus-visible:bg-white/5 focus-visible:text-white"
+                      >
+                        <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+                          {agent.imagePath ? (
+                            <Image src={agent.imagePath} alt="" width={22} height={22} className="h-5 w-5 object-contain" />
+                          ) : (
+                            <BookOpen className="h-4 w-4 text-[var(--accent-cyan)]" />
+                          )}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-semibold">{agent.name}</span>
+                          <span className="block truncate text-xs text-[var(--text-muted)]">{agent.vendor}</span>
+                        </span>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-[var(--text-muted)] transition-all duration-200 group-hover/agent:translate-x-0.5 group-hover/agent:text-[var(--accent-cyan)]" />
+                      </Link>
+                    ))}
+                  </div>
+
+                  <Link
+                    href="/agents"
+                    className="flex items-center justify-between rounded-2xl border border-cyan-300/15 bg-cyan-300/10 px-3 py-2 text-xs font-semibold text-[var(--accent-cyan)] transition-all duration-200 hover:bg-cyan-300/15"
+                  >
+                    View all installation concepts
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

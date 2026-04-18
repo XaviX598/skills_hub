@@ -1,7 +1,8 @@
-﻿/**
+/**
  * Skills browse page.
  */
 
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { Database, Search } from 'lucide-react';
@@ -15,6 +16,17 @@ interface SkillsPageProps {
 }
 
 const SKILLS_PAGE_SIZE = 30;
+
+export const metadata: Metadata = {
+  title: "Browse AI Agent Skills - Claude Code, OpenCode, MCP Skills Directory",
+  description: "Search and filter reusable skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, MCP, Cline, and Continue. Find skills by category, agent, and functionality.",
+  keywords: ["AI agent skills", "browse skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Windsurf skills", "Codex skills", "search skills", "developer skills"],
+  openGraph: {
+    title: "Browse AI Agent Skills - Claude Code, OpenCode, MCP Skills Directory",
+    description: "Search and filter reusable skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, MCP, Cline, and Continue.",
+    type: "website",
+  },
+};
 
 function buildPageHref(params: {
   agents: string[];
