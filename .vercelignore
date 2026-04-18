@@ -1,0 +1,8 @@
+.env
+.env.*
+.atl
+openspec
+SPEC.md
+node_modules
+.next
+tsconfig.tsbuildinfo
