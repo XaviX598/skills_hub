@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink, Terminal } from 'lucide-react';
 import { getAgentById } from '@/data/agents';
+import { SITE_URL } from '@/lib/site-url';
 
 interface AgentPageProps {
   params: Promise<{ id: string }>;
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: AgentPageProps): Promise<Meta
       type: "website",
     },
     alternates: {
-      canonical: `https://universal-skills-hub.com/agents/${id}`,
+      canonical: `${SITE_URL}/agents/${id}`,
     },
   };
 }

@@ -1,13 +1,14 @@
 ﻿import { redirect } from 'next/navigation';
-import { auth, signIn } from '@/lib/auth';
+import { signIn } from '@/lib/auth';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
+import { getOptionalSession } from '@/lib/session';
 
 interface LoginPageProps {
   searchParams: Promise<{ callbackUrl?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const session = await auth();
+  const session = await getOptionalSession();
   const { callbackUrl = '/skills' } = await searchParams;
 
   if (session?.user) {

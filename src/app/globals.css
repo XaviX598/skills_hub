@@ -179,6 +179,12 @@ body {
   z-index: 0;
 }
 
+.btn-primary > *,
+.btn-secondary > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Primary button motion */
 .btn-primary {
   display: inline-flex;

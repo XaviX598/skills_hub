@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,12 +20,12 @@ const jsonLd = {
   "@type": "WebSite",
   "name": "Universal Skills Hub",
   "description": "Directory for AI agent skills - Claude Code, OpenCode, Cursor, Codex, MCP. Discover, share, and install reusable skills for AI coding agents.",
-  "url": "https://universal-skills-hub.com",
+  "url": SITE_URL,
   "potentialAction": {
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://universal-skills-hub.com/skills?query={search_term_string}"
+      "urlTemplate": `${SITE_URL}/skills?query={search_term_string}`
     },
     "query-input": "required name=search_term_string"
   },
@@ -41,7 +42,7 @@ const jsonLd = {
   "provider": {
     "@type": "Organization",
     "name": "Universal Skills Hub",
-    "url": "https://universal-skills-hub.com"
+    "url": SITE_URL
   },
   "inLanguage": ["en"],
   "license": "https://github.com/xpressdev/universal-skills-hub",
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://universal-skills-hub.com",
+    url: SITE_URL,
     siteName: "Universal Skills Hub",
     title: "Universal Skills Hub - AI Agent Skills Directory",
     description: "Search and discover reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, and more.",
@@ -93,7 +94,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://universal-skills-hub.com",
+    canonical: SITE_URL,
   },
   other: {
     "schema:jsonld": JSON.stringify(jsonLd),

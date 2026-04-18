@@ -13,6 +13,7 @@ import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
 import { GitHubIcon } from '@/components/icons/GitHubIcon';
 import { getAgentName } from '@/data/agents';
 import type { AgentId } from '@/types';
+import { SITE_URL } from '@/lib/site-url';
 
 interface SkillPageProps {
   params: Promise<{ id: string }>;
@@ -43,6 +44,9 @@ export async function generateMetadata({ params }: SkillPageProps): Promise<Meta
       description: skill.description || `${skill.name} compatible with ${supportedAgents}`,
       type: "article",
       tags: [skill.category || 'AI Skills'],
+    },
+    alternates: {
+      canonical: `${SITE_URL}/skills/${id}`,
     },
   };
 }
