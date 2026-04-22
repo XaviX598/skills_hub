@@ -11,8 +11,10 @@ import GitHub from 'next-auth/providers/github';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { getPrisma } from './prisma';
 
+const hasDatabaseUrl = Boolean(process.env.DATABASE_URL);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(getPrisma()),
+  adapter: hasDatabaseUrl ? PrismaAdapter(getPrisma()) : undefined,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID,
@@ -20,9 +22,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    session: ({ session, user }) => {
+    session: ({ session, user, token }) => {
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = user?.id ?? token?.sub ?? session.user.id;
       }
       return session;
     },
@@ -30,7 +32,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: '/login',
   },
-  session: {
-    strategy: 'database',
-  },
+  session: hasDatabaseUrl ? { strategy: 'database' } : undefined,
 });

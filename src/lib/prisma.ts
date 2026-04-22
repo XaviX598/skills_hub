@@ -37,10 +37,16 @@ function getRuntimeDatabaseUrl(): string | undefined {
 
 export function getPrisma() {
   if (!globalForPrisma.prisma) {
+    const databaseUrl = getRuntimeDatabaseUrl();
+
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL is not configured');
+    }
+
     globalForPrisma.prisma = new PrismaClient({
       datasources: {
         db: {
-          url: getRuntimeDatabaseUrl(),
+          url: databaseUrl,
         },
       },
     });
