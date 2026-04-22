@@ -96,9 +96,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
   },
-  other: {
-    "schema:jsonld": JSON.stringify(jsonLd),
-  },
 };
 
 function Footer() {
@@ -217,6 +214,12 @@ export default function RootLayout({
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: stripHydrationScript }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+          }}
         />
         <Header />
         {children}

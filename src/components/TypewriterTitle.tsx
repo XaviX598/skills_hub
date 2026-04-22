@@ -6,13 +6,13 @@ const phrases = [
   'Find the right skill for your agent',
   'Discover MCP servers for your workflow',
   'Explore skills for Claude, Cursor & more',
-];
+] as const;
 
 type Phase = 'typing' | 'waiting' | 'deleting';
 
 export function TypewriterTitle() {
-  const [text, setText] = useState('');
-  const [phase, setPhase] = useState<Phase>('typing');
+  const [text, setText] = useState<string>(phrases[0]);
+  const [phase, setPhase] = useState<Phase>('waiting');
   const [phraseIndex, setPhraseIndex] = useState(0);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export function TypewriterTitle() {
   return (
     <h1 className="max-w-2xl text-3xl font-black tracking-tight md:text-5xl text-white">
       {renderText()}
-      <span className="animate-pulse">|</span>
+      <span aria-hidden="true" className="animate-pulse">|</span>
     </h1>
   );
 }
