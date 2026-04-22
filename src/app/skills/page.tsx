@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Database, Search } from 'lucide-react';
 import { getOptionalSession } from '@/lib/session';
 import { getDirectorySkills, parseCsvParam, parsePositiveIntegerParam } from '@/lib/skills';
+import { SITE_URL } from '@/lib/site-url';
 import { PlatformFilter } from '@/components/PlatformFilter';
 import { SkillCard } from '@/components/SkillCard';
 
@@ -25,6 +26,9 @@ export const metadata: Metadata = {
     title: "Browse AI Agent Skills - Claude Code, OpenCode, MCP Skills Directory",
     description: "Search and filter reusable skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, MCP, Cline, and Continue.",
     type: "website",
+  },
+  alternates: {
+    canonical: `${SITE_URL}/skills`,
   },
 };
 

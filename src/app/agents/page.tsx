@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { ArrowRight, BookOpen, ShieldCheck } from 'lucide-react';
 import { AGENTS } from '@/data/agents';
+import { SITE_URL } from '@/lib/site-url';
 
 export const metadata: Metadata = {
   title: "AI Coding Agents Guide - Install Claude Code, OpenCode, Cursor, Codex",
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
     title: "AI Coding Agents Guide - Install Claude Code, OpenCode, Cursor, Codex",
     description: "Step-by-step installation guides for Claude Code, OpenCode, Cursor, Windsurf, GitHub Copilot, Codex, Gemini CLI, Cline, Continue.",
     type: "website",
+  },
+  alternates: {
+    canonical: `${SITE_URL}/agents`,
   },
 };
 
