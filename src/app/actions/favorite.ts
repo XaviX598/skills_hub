@@ -1,12 +1,12 @@
-﻿'use server';
+'use server';
 
-import { auth } from '@/lib/auth';
+import { getCurrentSession } from '@/lib/session';
 import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function toggleFavorite(formData: FormData) {
-  const session = await auth();
+  const session = await getCurrentSession();
   const skillId = String(formData.get('skillId') ?? '');
   const redirectTo = String(formData.get('redirectTo') ?? '/skills');
 

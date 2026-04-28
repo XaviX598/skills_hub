@@ -21,6 +21,15 @@ model User {
   emailVerified  DateTime?
   image          String?
   githubUsername String?
+  password       String?
+  isPremium      Boolean    @default(false)
+  premiumExpiresAt DateTime?
+  stripeCustomerId String?  @unique
+isVerified     Boolean    @default(false)
+  verificationCode String?
+  verificationCodeExpires DateTime?
+  verificationCodeSentAt DateTime?
+  verificationCodeAttempts Int       @default(0)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   accounts       Account[]

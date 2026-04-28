@@ -186,3 +186,27 @@ export function getAgentName(agentId: AgentId): string {
 export function getAgentById(agentId: AgentId): AgentDefinition | undefined {
   return AGENTS.find((agent) => agent.id === agentId);
 }
+
+// Alias mapping for common search terms
+const AGENT_ALIASES: Record<string, string> = {
+  'claude': 'claude-code',
+  'claudeai': 'claude-code',
+  'anthropic': 'claude-code',
+  'anthropic-claude': 'claude-code',
+  'open-code': 'opencode',
+  'open_code': 'opencode',
+  'mcp': 'mcp',
+  'model-context-protocol': 'mcp',
+};
+
+export function resolveAgentAlias(idOrAlias: string): string {
+  const normalized = idOrAlias.toLowerCase().trim();
+  
+  // Check if it's already a valid agent ID
+  if (AGENTS.find((a) => a.id === normalized)) {
+    return normalized;
+  }
+  
+  // Check aliases
+  return AGENT_ALIASES[normalized] || idOrAlias;
+}

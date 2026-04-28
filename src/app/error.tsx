@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 /**
  * Error boundary.
@@ -27,7 +27,7 @@ export default function Error({ error, reset }: ErrorProps) {
         <p className="text-sm leading-6 text-[var(--text-secondary)]">
           {error.message || 'An unexpected error occurred. Please try again.'}
         </p>
-        <button onClick={() => reset()} className="btn-primary" type="button">
+        <button onClick={() => reset()} className="btn-secondary" type="button">
           <RefreshCw className="h-4 w-4" />
           Try again
         </button>
@@ -35,3 +35,4 @@ export default function Error({ error, reset }: ErrorProps) {
     </div>
   );
 }
+

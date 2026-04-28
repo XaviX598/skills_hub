@@ -42,6 +42,7 @@ export interface Skill {
   updatedAt: string;
   favoriteCount?: number;
   isFavorited?: boolean;
+  source?: string;
 }
 
 export interface SkillDetail extends Skill {
@@ -105,3 +106,4 @@ export interface McpServer {
   stars?: number;
   author?: string;
 }
+

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useActionState } from 'react';
 import { Upload } from 'lucide-react';
@@ -120,7 +120,7 @@ export function SubmitSkillForm() {
       <button
         type="submit"
         disabled={pending}
-        className="btn-primary w-full"
+        className="btn-secondary w-full"
       >
         <Upload className="h-4 w-4" />
         {pending ? 'Submitting...' : 'Submit skill'}
@@ -128,3 +128,4 @@ export function SubmitSkillForm() {
     </form>
   );
 }
+

@@ -15,9 +15,15 @@ import { GitHubIcon } from '@/components/icons/GitHubIcon';
 import { TypewriterTitle } from '@/components/TypewriterTitle';
 
 export const metadata: Metadata = {
-  title: "Universal Skills Hub - AI Agent Skills Directory",
-  description: "Discover, search, and install reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue. Browse thousands of skills for AI coding agents.",
-  keywords: ["AI agent skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Codex skills", "Windsurf skills", "AI coding agents", "Cline skills", "Continue skills", "developer skills"],
+  title: "Universal Skills Hub - AI Agent Skills Directory for Claude Code, OpenCode, Cursor, MCP",
+  description: "Discover, search, and install reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue. Browse thousands of skills for AI coding agents like claude code, opencode, mcp skills.",
+  keywords: [
+    "AI agent skills", "Claude Code skills", "claude code", "claude id", "claude skills",
+    "OpenCode skills", "open code", "opencode", "openclaw",
+    "Cursor skills", "Windsurf skills", "Codex skills", 
+    "MCP skills", "mcp", "Cline skills", "Continue skills", 
+    "skills ia", "skills", "AI coding agents", "developer skills"
+  ],
   openGraph: {
     title: "Universal Skills Hub - AI Agent Skills Directory",
     description: "Discover and install reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue.",

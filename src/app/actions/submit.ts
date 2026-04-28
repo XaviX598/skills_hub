@@ -1,6 +1,6 @@
-﻿'use server';
+'use server';
 
-import { auth } from '@/lib/auth';
+import { getCurrentSession } from '@/lib/session';
 import { getPrisma } from '@/lib/prisma';
 import { extractGitHubRepository } from '@/lib/skills';
 import { revalidatePath } from 'next/cache';
@@ -35,7 +35,7 @@ export type SubmitSkillState = {
 };
 
 export async function submitSkill(_previousState: SubmitSkillState, formData: FormData): Promise<SubmitSkillState> {
-  const session = await auth();
+  const session = await getCurrentSession();
 
   if (!session?.user?.id) {
     redirect('/login?callbackUrl=/submit');

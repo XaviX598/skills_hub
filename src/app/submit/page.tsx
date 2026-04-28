@@ -1,15 +1,15 @@
-﻿/**
+/**
  * Skill submission page.
  */
 
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { getCurrentSession } from '@/lib/session';
 import { SubmitSkillForm } from '@/components/forms/SubmitSkillForm';
 
 export default async function SubmitPage() {
-  const session = await auth();
+  const session = await getCurrentSession();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect('/login?callbackUrl=/submit');
   }
 

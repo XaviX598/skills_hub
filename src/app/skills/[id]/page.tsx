@@ -5,12 +5,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Copy, ExternalLink, Heart, PackageCheck } from 'lucide-react';
+import { ArrowLeft, Copy, ExternalLink, PackageCheck } from 'lucide-react';
 import { getOptionalSession } from '@/lib/session';
 import { getSkillById } from '@/lib/skills';
-import { toggleFavorite } from '@/app/actions/favorite';
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
-import { GitHubIcon } from '@/components/icons/GitHubIcon';
+import { InstallButton } from '@/components/InstallButton';
+import { FavoriteButton } from '@/components/FavoriteButton';
 import { getAgentName } from '@/data/agents';
 import type { AgentId } from '@/types';
 import { SITE_URL } from '@/lib/site-url';
@@ -25,12 +25,11 @@ export async function generateMetadata({ params }: SkillPageProps): Promise<Meta
 
   if (!skill) {
     return {
-      title: "Skill Not Found",
-      description: "The requested skill could not be found in the directory.",
+      title: 'Skill Not Found',
+      description: 'The requested skill could not be found in the directory.',
     };
   }
 
-  // Get agent names for keywords
   const agentList = skill.agents || [];
   const supportedAgents = agentList.map((agentId: AgentId) => getAgentName(agentId) || agentId).join(', ') || 'Multiple AI Agents';
   const category = skill.category || 'AI Agent Skills';
@@ -42,7 +41,7 @@ export async function generateMetadata({ params }: SkillPageProps): Promise<Meta
     openGraph: {
       title: `${skill.name} - AI Agent Skill`,
       description: skill.description || `${skill.name} compatible with ${supportedAgents}`,
-      type: "article",
+      type: 'article',
       tags: [skill.category || 'AI Skills'],
     },
     alternates: {
@@ -72,29 +71,19 @@ export default async function SkillPage({ params }: SkillPageProps) {
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="mb-4 flex flex-wrap gap-2">
-                {skill.category && (
-                  <span className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--accent-cyan)]">
-                    {skill.category}
-                  </span>
-                )}
-                {skill.owner && (
-                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-xs text-[var(--text-muted)]">
-                    {skill.owner}/{skill.repoName}
-                  </span>
-                )}
+                {skill.category && <span className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--accent-cyan)]">{skill.category}</span>}
+                {skill.owner && <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-xs text-[var(--text-muted)]">{skill.owner}/{skill.repoName}</span>}
               </div>
               <h1 className="text-4xl font-black tracking-tight md:text-5xl">{skill.name}</h1>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--text-secondary)]">{skill.description}</p>
             </div>
 
-            <form action={toggleFavorite}>
-              <input type="hidden" name="skillId" value={skill.id} />
-              <input type="hidden" name="redirectTo" value={`/skills/${skill.id}`} />
-              <button type="submit" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] transition-colors hover:border-rose-300/30 hover:text-[var(--accent-crimson)]">
-                <Heart className={`h-4 w-4 ${skill.isFavorited ? 'fill-[var(--accent-crimson)] text-[var(--accent-crimson)]' : ''}`} />
-                {skill.isFavorited ? 'Saved' : 'Save'} · {skill.favoriteCount ?? 0}
-              </button>
-            </form>
+<FavoriteButton
+              skillId={skill.id}
+              isFavorited={skill.isFavorited ?? false}
+              redirectTo={`/skills/${skill.id}`}
+              favoriteCount={skill.favoriteCount ?? 0}
+            />
           </div>
 
           <div className="mt-7 flex flex-wrap gap-2">
@@ -118,20 +107,9 @@ export default async function SkillPage({ params }: SkillPageProps) {
             </div>
           )}
 
-          <div className="mt-7 flex flex-wrap items-center gap-4 border-t border-white/10 pt-6">
-            {skill.repositoryUrl && (
-              <a href={skill.repositoryUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                <GitHubIcon className="h-4 w-4" />
-                Repository
-              </a>
-            )}
-            {skill.documentationUrl && (
-              <a href={skill.documentationUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                <ExternalLink className="h-4 w-4" />
-                Source page
-              </a>
-            )}
-            <Link href="/submit" className="btn-primary">
+<div className="mt-7 flex flex-wrap items-center gap-4 border-t border-white/10 pt-6">
+            <InstallButton installCommand={skill.installCommand} owner={skill.owner} repoName={skill.repoName} agents={skill.agents} />
+            <Link href="/submit" className="btn-secondary">
               <PackageCheck className="h-4 w-4" />
               Submit a related skill
             </Link>

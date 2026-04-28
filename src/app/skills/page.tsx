@@ -18,9 +18,15 @@ interface SkillsPageProps {
 const SKILLS_PAGE_SIZE = 30;
 
 export const metadata: Metadata = {
-  title: "Browse AI Agent Skills - Claude Code, OpenCode, MCP Skills Directory",
+  title: "Browse AI Agent Skills - Claude Code, OpenCode, MCP, Cursor, Windsurf Skills Directory",
   description: "Search and filter reusable skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, MCP, Cline, and Continue. Find skills by category, agent, and functionality.",
-  keywords: ["AI agent skills", "browse skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Windsurf skills", "Codex skills", "search skills", "developer skills"],
+  keywords: [
+    "AI agent skills", "browse skills", "Claude Code skills", "claude code", "claude id", "claude skills",
+    "OpenCode skills", "open code", "opencode", "openclaw",
+    "Cursor skills", "Windsurf skills", "Codex skills", 
+    "MCP skills", "mcp", "Cline skills", "Continue skills",
+    "skills ia", "skills", "search skills", "developer skills"
+  ],
   openGraph: {
     title: "Browse AI Agent Skills - Claude Code, OpenCode, MCP Skills Directory",
     description: "Search and filter reusable skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, MCP, Cline, and Continue.",
@@ -188,7 +194,7 @@ export default async function SkillsPage({ searchParams }: SkillsPageProps) {
           </div>
           {selectedAgents.length > 0 && <input type="hidden" name="agents" value={selectedAgents.join(',')} />}
           {category && <input type="hidden" name="category" value={category} />}
-          <button type="submit" className="btn-primary">Search</button>
+          <button type="submit" className="btn-secondary">Search</button>
         </form>
 
         <div className="flex flex-col gap-8 lg:flex-row">
@@ -236,3 +242,4 @@ export default async function SkillsPage({ searchParams }: SkillsPageProps) {
     </main>
   );
 }
+

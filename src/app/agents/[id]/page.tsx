@@ -1,8 +1,8 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft, ExternalLink, Terminal } from 'lucide-react';
-import { getAgentById } from '@/data/agents';
+import { getAgentById, resolveAgentAlias } from '@/data/agents';
 import { SITE_URL } from '@/lib/site-url';
 
 interface AgentPageProps {
@@ -11,7 +11,9 @@ interface AgentPageProps {
 
 export async function generateMetadata({ params }: AgentPageProps): Promise<Metadata> {
   const { id } = await params;
-  const agent = getAgentById(id);
+  // Resolve alias (e.g., "claude" -> "claude-code")
+  const resolvedId = resolveAgentAlias(id);
+  const agent = getAgentById(resolvedId);
 
   if (!agent) {
     return {
@@ -56,7 +58,9 @@ function getCompetitiveKeywords(agentName: string): string {
 
 export default async function AgentPage({ params }: AgentPageProps) {
   const { id } = await params;
-  const agent = getAgentById(id);
+  // Resolve alias (e.g., "claude" -> "claude-code")
+  const resolvedId = resolveAgentAlias(id);
+  const agent = getAgentById(resolvedId);
 
   if (!agent) {
     notFound();
@@ -118,7 +122,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
                 Website <ExternalLink className="h-4 w-4" />
               </a>
             )}
-            <Link href={`/skills?agents=${agent.id}`} className="btn-primary">
+            <Link href={`/skills?agents=${agent.id}`} className="btn-secondary">
               Skills for {agent.name}
             </Link>
           </div>
@@ -127,3 +131,4 @@ export default async function AgentPage({ params }: AgentPageProps) {
     </main>
   );
 }
+
