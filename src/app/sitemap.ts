@@ -1,11 +1,8 @@
 import { MetadataRoute } from 'next';
-import { getDirectorySkills } from '@/lib/skills';
 import { AGENTS } from '@/data/agents';
 import { SITE_URL } from '@/lib/site-url';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { skills } = await getDirectorySkills({ limit: 1000 });
-
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -21,10 +18,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${SITE_URL}/app`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/download`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
       url: `${SITE_URL}/agents`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/submit`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
     },
   ];
 
@@ -35,16 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
-
-  // Skill detail pages (limit to first 500 for sitemap size)
-  const skillPages: MetadataRoute.Sitemap = skills.slice(0, 500).map((skill) => ({
-    url: `${SITE_URL}/skills/${skill.id}`,
-    lastModified: skill.updatedAt ? new Date(skill.updatedAt) : new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }));
-
-  return [...staticPages, ...agentPages, ...skillPages];
+  return [...staticPages, ...agentPages];
 }
 
 export const dynamic = 'force-dynamic';

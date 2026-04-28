@@ -1,0 +1,77 @@
+name: Daily Skill Sync
+
+on:
+  schedule:
+    # Runs daily at 3:00 AM UTC (11:00 PM Argentina time)
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub UI
+
+jobs:
+  sync-skills:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync Skillful catalog into production database
+        if: ${{ secrets.DATABASE_URL != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SKILLFUL_DB_IMPORT_LIMIT: 5000
+          SKILLFUL_DB_IMPORT_SORT: updated
+          SKILLFUL_DB_IMPORT_MODE: upsert
+        run: npm run import:skillful-db
+
+      - name: Import skills from Skillful.sh
+        env:
+          SKILLFUL_IMPORT_LIMIT: 1000
+        run: npm run import:skills
+
+      - name: Scrape skills from skills.sh
+        run: npx tsx scripts/scrape-skills.ts || true
+        continue-on-error: true
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push if changes exist
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Add all changes
+          git add -A
+          
+          # Commit with timestamp
+          git commit -m "chore: sync skills from external sources - $(date -u +'%Y-%m-%d')"
+          
+          # Push changes
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report results
+        if: steps.changes.outputs.changed == 'true'
+        run: echo "✓ Skills updated and committed successfully"

@@ -54,6 +54,7 @@ export const metadata: Metadata = {
     default: "Universal Skills Hub",
     template: "%s | Universal Skills Hub",
   },
+  metadataBase: new URL(SITE_URL),
   description: "Search, compare, and publish reusable AI agent skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, Gemini CLI, Cline, Continue, and more.",
   keywords: ["AI agent skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Codex skills", "Windsurf skills", "AI coding agents", "developer skills", "AI instructions"],
   authors: [{ name: "Xpress Developer" }],

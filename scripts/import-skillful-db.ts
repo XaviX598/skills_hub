@@ -91,10 +91,22 @@ interface ImportConfig {
   importLimit: number;
   resetSkillful: boolean;
   sort: SkillfulSort;
+  mode: 'insert' | 'upsert';
 }
 
 function loadEnvFile(): void {
-  const envText = readFileSync('.env', 'utf8');
+  if (process.env.DATABASE_URL) {
+    return;
+  }
+
+  let envText = '';
+  try {
+    envText = readFileSync('.env', 'utf8');
+  } catch {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured and .env could not be loaded');
+    }
+  }
 
   for (const line of envText.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -109,7 +121,9 @@ function loadEnvFile(): void {
       value = value.slice(1, -1);
     }
 
-    process.env[key] = value;
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
   }
 
   if (!process.env.DATABASE_URL) {
@@ -147,11 +161,14 @@ function parseSkillfulSort(value: string | undefined): SkillfulSort {
 }
 
 function getImportConfig(): ImportConfig {
+  const mode = process.env.SKILLFUL_DB_IMPORT_MODE === 'upsert' ? 'upsert' : 'insert';
+
   return {
     startPage: parsePositiveInteger(process.env.SKILLFUL_DB_IMPORT_START_PAGE, 1),
     importLimit: parsePositiveInteger(process.env.SKILLFUL_DB_IMPORT_LIMIT, DEFAULT_IMPORT_LIMIT),
     resetSkillful: process.env.SKILLFUL_DB_IMPORT_RESET === 'true',
     sort: parseSkillfulSort(process.env.SKILLFUL_DB_IMPORT_SORT),
+    mode,
   };
 }
 
@@ -396,6 +413,69 @@ async function getImportUserId(prisma: PrismaClient): Promise<string> {
   return user.id;
 }
 
+async function persistSkillsPage(
+  prisma: PrismaClient,
+  skills: Prisma.SkillCreateManyInput[],
+  mode: ImportConfig['mode'],
+): Promise<{ inserted: number; updated: number; skipped: number }> {
+  if (mode === 'insert') {
+    const result = await withDatabaseRetry('Skillful page createMany', () =>
+      prisma.skill.createMany({
+        data: skills,
+        skipDuplicates: true,
+      }),
+    );
+
+    return {
+      inserted: result.count,
+      updated: 0,
+      skipped: skills.length - result.count,
+    };
+  }
+
+  let inserted = 0;
+  let updated = 0;
+
+  for (const skill of skills) {
+    const existing = await prisma.skill.findUnique({
+      where: { id: skill.id },
+      select: { id: true },
+    });
+
+    await withDatabaseRetry(`Skillful skill upsert ${skill.id}`, () =>
+      prisma.skill.upsert({
+        where: { id: skill.id },
+        update: {
+          name: skill.name,
+          description: skill.description,
+          repositoryUrl: skill.repositoryUrl,
+          documentationUrl: skill.documentationUrl,
+          category: skill.category,
+          tags: skill.tags,
+          agents: skill.agents,
+          owner: skill.owner,
+          repoName: skill.repoName,
+          installCommand: skill.installCommand,
+          updatedAt: skill.updatedAt,
+        },
+        create: skill,
+      }),
+    );
+
+    if (existing) {
+      updated += 1;
+    } else {
+      inserted += 1;
+    }
+  }
+
+  return {
+    inserted,
+    updated,
+    skipped: 0,
+  };
+}
+
 async function importSkillfulToDatabase(): Promise<void> {
   loadEnvFile();
 
@@ -404,6 +484,7 @@ async function importSkillfulToDatabase(): Promise<void> {
   const startedAt = Date.now();
   let processed = 0;
   let inserted = 0;
+  let updated = 0;
   let skipped = 0;
   let remoteTotal = 0;
 
@@ -428,23 +509,21 @@ async function importSkillfulToDatabase(): Promise<void> {
       const remaining = config.importLimit - processed;
       const pageItems = data.items.slice(0, remaining);
       const skills = pageItems.map((item) => normalizeSkill(item, authorId));
-      const result = await withDatabaseRetry(`Skillful page ${page} createMany`, () =>
-        prisma.skill.createMany({
-          data: skills,
-          skipDuplicates: true,
-        }),
-      );
+      const pageResult = await persistSkillsPage(prisma, skills, config.mode);
 
       processed += pageItems.length;
-      inserted += result.count;
-      skipped += skills.length - result.count;
+      inserted += pageResult.inserted;
+      updated += pageResult.updated;
+      skipped += pageResult.skipped;
 
       console.log(
         [
           `page=${page}/${data.pagination.totalPages}`,
           `sort=${config.sort}`,
+          `mode=${config.mode}`,
           `processed=${processed.toLocaleString()}`,
           `inserted=${inserted.toLocaleString()}`,
+          `updated=${updated.toLocaleString()}`,
           `skipped=${skipped.toLocaleString()}`,
           `remote=${remoteTotal.toLocaleString()}`,
         ].join(' '),
@@ -465,6 +544,7 @@ async function importSkillfulToDatabase(): Promise<void> {
         {
           processed,
           inserted,
+          updated,
           skipped,
           remoteTotal,
           totalSkillful,
