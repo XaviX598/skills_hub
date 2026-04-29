@@ -1,15 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { Check, ChevronRight, Clock, Crown, Download, ExternalLink, Lock, Monitor, ShieldCheck, Sparkles, Terminal, Zap } from 'lucide-react';
-import { getCurrentSession } from '@/lib/session';
+import { Clock, Download, Monitor, Sparkles, Terminal, Zap, ShieldCheck } from 'lucide-react';
 import { getDirectorySkills } from '@/lib/skills';
-import { getPrisma } from '@/lib/prisma';
 import { SITE_URL } from '@/lib/site-url';
 import { SkillCard } from '@/components/SkillCard';
 
 const DESKTOP_RELEASE_URL = 'https://github.com/XaviX598/skills_hub/releases/latest/download/Universal-Skills-Hub.exe';
-const DESKTOP_SOURCE_URL = 'https://github.com/XaviX598/skills_hub/tree/main/desktop-app';
 
 export const metadata: Metadata = {
   title: 'Desktop App for AI Agent Skills - Skills Hub - Claude Code, OpenCode, MCP',
@@ -32,10 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-interface AppPageProps {
-  searchParams: Promise<{ success?: string; canceled?: string }>;
-}
-
 const appHighlights = [
   {
     icon: Terminal,
@@ -50,7 +42,7 @@ const appHighlights = [
   {
     icon: ShieldCheck,
     title: 'Centralized catalog',
-    description: 'Uses the same directory as the site so premium gets a consistent experience.',
+    description: 'Uses the same directory as the site so you get a consistent experience.',
   },
 ];
 
@@ -60,36 +52,7 @@ const appSteps = [
   'Pick a skill from the catalog and install it in seconds.',
 ];
 
-function AccessPanel({
-  isLoggedIn,
-}: {
-  isLoggedIn: boolean;
-  isPremium?: boolean;
-}) {
-if (!isLoggedIn) {
-    return (
-      <div className="glass-panel rounded-[2rem] p-6 md:p-7">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-          <Lock className="h-3.5 w-3.5" />
-          Access blocked
-        </div>
-        <h2 className="text-2xl font-black tracking-tight">Sign in to download</h2>
-        <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-          You can see what the app does, but to download it you need to sign in with your account.
-        </p>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Link href="/login?callbackUrl=/app" className="btn-secondary">
-            Sign in
-          </Link>
-          <Link href="/skills" className="btn-secondary">
-            Browse skills
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-// User is logged in - but download is coming soon
+function DownloadPanel() {
   return (
     <div className="glass-panel rounded-[2rem] p-6 md:p-7">
       <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-amber)]">
@@ -100,7 +63,7 @@ if (!isLoggedIn) {
       <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
         The desktop app is currently in development. Sign up to get early access when it's available.
       </p>
-<div className="mt-6 flex flex-col gap-3">
+      <div className="mt-6 flex flex-col gap-3">
         <button disabled className="btn-disabled inline-flex items-center justify-center gap-2 text-base cursor-not-allowed opacity-50">
           <Download className="h-5 w-5" />
           Download for Windows
@@ -111,33 +74,9 @@ if (!isLoggedIn) {
   );
 }
 
-export default async function AppPage({ searchParams }: AppPageProps) {
-  const session = await getCurrentSession();
+export default async function AppPage() {
+  const { skills } = await getDirectorySkills({ limit: 6 });
   
-  // Require authentication for desktop app access (for future premium control)
-  if (!session?.user?.id) {
-    redirect('/login?callbackUrl=/app');
-  }
-  
-  const params = await searchParams;
-  const prisma = getPrisma();
-
-  const currentUserId = session?.user?.id;
-  const premiumUser = currentUserId
-    ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        select: { isPremium: true, premiumExpiresAt: true },
-      })
-    : null;
-
-  const isPremium = Boolean(
-    premiumUser?.isPremium && premiumUser.premiumExpiresAt && premiumUser.premiumExpiresAt > new Date(),
-  );
-
-  const { skills } = await getDirectorySkills({ currentUserId, limit: 6 });
-  const showSuccess = params.success === 'true';
-  const showCanceled = params.canceled === 'true';
-  const isLoggedIn = Boolean(session?.user?.id);
   const appJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -183,11 +122,11 @@ export default async function AppPage({ searchParams }: AppPageProps) {
                 </span>
               </h1>
 
-<p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-secondary)] md:text-xl">
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-secondary)] md:text-xl">
                 The web helps you discover the catalog; the app handles the operational part: detecting agents, choosing skills, and installing them in 1 click.
               </p>
 
-<div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/skills" className="btn-secondary">
                   View full catalog
                 </Link>
@@ -195,12 +134,9 @@ export default async function AppPage({ searchParams }: AppPageProps) {
             </div>
 
             <div className="space-y-4">
-              <AccessPanel
-                isLoggedIn={isLoggedIn}
-                isPremium={isPremium}
-              />
+              <DownloadPanel />
 
-<div className="glass-panel rounded-[2rem] p-6 md:p-7">
+              <div className="glass-panel rounded-[2rem] p-6 md:p-7">
                 <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--accent-cyan)]">
                   <Monitor className="h-4 w-4" />
                   Usage flow
@@ -229,7 +165,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
               <h2 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">Same visual language, better operational experience</h2>
             </div>
             <p className="max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
-              The idea is not just to have an app. The idea is to close the loop: you discover on the web, manage access via premium, and execute installation from desktop.
+              The idea is not just to have an app. The idea is to close the loop: you discover on the web and execute installation from desktop.
             </p>
           </div>
 
@@ -251,33 +187,14 @@ export default async function AppPage({ searchParams }: AppPageProps) {
       </section>
 
       <section className="border-y border-white/10 py-20">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 md:px-6 lg:grid-cols-[1fr_1fr]">
-          <div className="glass-panel rounded-[2rem] p-7">
-            <p className="font-mono text-xs uppercase tracking-[0.25em] text-[var(--accent-cyan)]">Access logic</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight">Access logic explained</h2>
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <div className="font-semibold text-white">No session</div>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">See app description and a CTA to sign in.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <div className="font-semibold text-white">Session, no premium</div>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">See the premium pitch and purchase button.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <div className="font-semibold text-white">Session with premium</div>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">See direct .exe download and source code access.</p>
-              </div>
-            </div>
-          </div>
-
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 md:px-6 lg:grid-cols-2">
           <div className="glass-panel rounded-[2rem] p-7">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-[var(--accent-cyan)]">Release</p>
             <h2 className="mt-2 text-3xl font-black tracking-tight">Release status</h2>
             <p className="mt-4 text-sm leading-6 text-[var(--text-secondary)]">
-              The page points to a GitHub release and the desktop-app folder in the repo. The intent is well structured, but remember to manually validate the final .exe asset whenever you publish a new version.
+              The page points to a GitHub release and the desktop-app folder in the repo. The final .exe asset will be available when we publish a new version.
             </p>
-<div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <a href={DESKTOP_RELEASE_URL} className="btn-secondary inline-flex items-center justify-center gap-2">
                 <Download className="h-4 w-4" />
                 Open release
@@ -296,7 +213,7 @@ export default async function AppPage({ searchParams }: AppPageProps) {
             </div>
             <Link href="/skills" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent-cyan)]">
               View all on the web
-              <ChevronRight className="h-4 w-4" />
+              <Link href="/skills" />
             </Link>
           </div>
 
