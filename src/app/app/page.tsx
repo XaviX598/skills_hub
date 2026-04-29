@@ -64,6 +64,7 @@ function AccessPanel({
   isLoggedIn,
 }: {
   isLoggedIn: boolean;
+  isPremium?: boolean;
 }) {
 if (!isLoggedIn) {
     return (
