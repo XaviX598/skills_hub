@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Clock, Download, Monitor, Sparkles, Terminal, Zap, ShieldCheck } from 'lucide-react';
+import { Clock, Download, ExternalLink, Monitor, Sparkles, Terminal, Zap, ShieldCheck } from 'lucide-react';
 import { getDirectorySkills } from '@/lib/skills';
 import { SITE_URL } from '@/lib/site-url';
 import { SkillCard } from '@/components/SkillCard';
@@ -213,7 +213,6 @@ export default async function AppPage() {
             </div>
             <Link href="/skills" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent-cyan)]">
               View all on the web
-              <Link href="/skills" />
             </Link>
           </div>
 

@@ -109,3 +109,27 @@ model Favorite {
   @@unique([userId, skillId])
   @@index([skillId])
 }
+
+model AuthorizationCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  userId      String
+  deviceName  String?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  used        Boolean  @default(false)
+  usedAt      DateTime?
+
+  @@index([code])
+}
+
+model DeviceSession {
+  id          String   @id @default(cuid())
+  userId      String
+  deviceName  String
+  deviceToken String   @unique
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([deviceToken])
+}
