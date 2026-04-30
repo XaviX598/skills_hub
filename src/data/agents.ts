@@ -65,6 +65,26 @@ export const AGENTS: AgentDefinition[] = [
     skillLocation: 'Cursor commonly uses rules and project instructions rather than a single universal skill format.',
   },
   {
+    id: 'mcp',
+    name: 'MCP',
+    vendor: 'Model Context Protocol',
+    description: 'Protocol-driven tool integration layer used by AI agents to connect with structured tools, servers, and external context.',
+    installSummary: 'Set up an MCP-compatible client or agent, configure trusted MCP servers, then connect reusable workflows and tools deliberately.',
+    docsUrl: 'https://modelcontextprotocol.io/introduction',
+    websiteUrl: 'https://modelcontextprotocol.io',
+    installSteps: [
+      'Choose an MCP-compatible client or agent environment.',
+      'Configure the MCP server entries you actually trust and need.',
+      'Verify each server tool contract before letting it touch real systems.',
+      'Use small, testable workflows first before wiring MCP into broader automation.',
+    ],
+    skillLocation: 'MCP setups vary by client; skills usually map to tool definitions, server configuration, or reusable workflow instructions.',
+    skillNotes: [
+      'MCP is a protocol, not a single app, so installation depends on the client you use.',
+      'Treat every MCP server like executable infrastructure: verify permissions and scope before enabling it.',
+    ],
+  },
+  {
     id: 'github-copilot',
     name: 'GitHub Copilot',
     vendor: 'GitHub',
@@ -197,6 +217,9 @@ const AGENT_ALIASES: Record<string, string> = {
   'open_code': 'opencode',
   'mcp': 'mcp',
   'model-context-protocol': 'mcp',
+  'copilot': 'github-copilot',
+  'githubcopilot': 'github-copilot',
+  'continue.dev': 'continue',
 };
 
 export function resolveAgentAlias(idOrAlias: string): string {

@@ -4,6 +4,8 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::process::Command;
+use reqwest::blocking::Client;
+use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 
 // ============ TYPES ============
 
@@ -48,10 +50,12 @@ pub struct DirectorySkill {
     pub name: String,
     pub description: String,
     pub owner: Option<String>,
-    pub repoName: Option<String>,
+    #[serde(rename = "repoName")]
+    pub repo_name: Option<String>,
     pub category: Option<String>,
     pub agents: Vec<String>,
-    pub installCommand: Option<String>,
+    #[serde(rename = "installCommand")]
+    pub install_command: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,8 +63,10 @@ pub struct SkillsApiResponse {
     pub skills: Vec<DirectorySkill>,
     pub total: i64,
     pub page: i64,
-    pub pageSize: i64,
-    pub totalPages: i64,
+    #[serde(rename = "pageSize")]
+    pub page_size: i64,
+    #[serde(rename = "totalPages")]
+    pub total_pages: i64,
 }
 
 // ============ AGENT DETECTION ============
@@ -174,6 +180,51 @@ fn detect_agents() -> Vec<Agent> {
         install_path: if gemini_installed { Some("gemini".to_string()) } else { None },
         skills_dir: None,
     });
+
+    // Codex
+    let codex_installed = check_binary_exists("codex");
+    let codex_skills_dir = get_home_dir().map(|h|
+        h.join(".codex").join("skills").to_string_lossy().to_string()
+    );
+
+    agents.push(Agent {
+        id: "codex".to_string(),
+        name: "Codex".to_string(),
+        installed: codex_installed,
+        install_path: if codex_installed { Some("codex".to_string()) } else { None },
+        skills_dir: codex_skills_dir,
+    });
+
+    // GitHub Copilot
+    agents.push(Agent {
+        id: "github-copilot".to_string(),
+        name: "GitHub Copilot".to_string(),
+        installed: false,
+        install_path: None,
+        skills_dir: None,
+    });
+
+    // Continue
+    let continue_skills_dir = get_home_dir().map(|h|
+        h.join(".continue").join("rules").to_string_lossy().to_string()
+    );
+
+    agents.push(Agent {
+        id: "continue".to_string(),
+        name: "Continue".to_string(),
+        installed: false,
+        install_path: None,
+        skills_dir: continue_skills_dir,
+    });
+
+    // MCP
+    agents.push(Agent {
+        id: "mcp".to_string(),
+        name: "MCP".to_string(),
+        installed: false,
+        install_path: None,
+        skills_dir: None,
+    });
     
     agents
 }
@@ -189,6 +240,8 @@ fn get_agent_skills_dir(agent_id: &str) -> Option<PathBuf> {
             "opencode" => h.join(".config").join("opencode").join("skills"),
             "gemini-cli" => h.join(".gemini").join("antigravity").join("skills"),
             "cline" => h.join(".cline"),
+            "codex" => h.join(".codex").join("skills"),
+            "continue" => h.join(".continue").join("rules"),
             _ => h,
         }
     })
@@ -313,11 +366,11 @@ fn fetch_all_skills() -> Result<Vec<Skill>, String> {
                 name: dir_skill.name.clone(),
                 description: dir_skill.description.clone(),
                 owner: dir_skill.owner.clone().unwrap_or_else(|| "universal-skills-hub".to_string()),
-                repo: dir_skill.repoName.clone().unwrap_or_else(|| dir_skill.name.clone()),
+                repo: dir_skill.repo_name.clone().unwrap_or_else(|| dir_skill.name.clone()),
                 category: dir_skill.category.clone().unwrap_or_else(|| "General".to_string()),
                 agents: dir_skill.agents.clone(),
-                install_command: dir_skill.installCommand.clone().unwrap_or_else(|| {
-                    if let (Some(owner), Some(repo)) = (&dir_skill.owner, &dir_skill.repoName) {
+                install_command: dir_skill.install_command.clone().unwrap_or_else(|| {
+                    if let (Some(owner), Some(repo)) = (&dir_skill.owner, &dir_skill.repo_name) {
                         format!("npx skills add {}/{}", owner, repo)
                     } else {
                         format!("npx skills add {}", dir_skill.name)
@@ -632,172 +685,96 @@ fn open_external_url(url: String) -> Result<(), String> {
 
 // ============ CHECK SESSION ============
 
-#[derive(Serialize, Deserialize)]
-pub struct SessionCheckResponse {
-    pub logged_in: bool,
-    pub user: Option<SessionUser>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceSessionCheckResponse {
+    pub authenticated: bool,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct SessionUser {
-    pub id: String,
-    pub email: String,
-    pub name: Option<String>,
-}
-
-#[tauri::command]
-fn check_web_session() -> Result<SessionCheckResponse, String> {
-    let base_url = get_skills_api_base_url();
-    let url = format!("{}/api/auth/session", base_url);
-    
-    #[cfg(target_os = "windows")]
-    {
-        let output = Command::new("curl")
-            .args(["-s", "-L", &url])
-            .output()
-            .map_err(|e| format!("curl failed: {}", e))?;
-        
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        
-        // If response contains user info, user is logged in
-        if stdout.contains("\"user\"") && !stdout.contains("null") {
-            return Ok(SessionCheckResponse {
-                logged_in: true,
-                user: Some(SessionUser {
-                    id: "1".to_string(),
-                    email: "logged_in".to_string(),
-                    name: None,
-                }),
-            });
-        }
-        
-        Ok(SessionCheckResponse {
-            logged_in: false,
-            user: None,
-        })
-    }
-    
-    #[cfg(not(target_os = "windows"))]
-    {
-        let output = Command::new("curl")
-            .args(["-s", "-L", &url])
-            .output()
-            .map_err(|e| format!("curl failed: {}", e))?;
-        
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        
-        if stdout.contains("\"user\"") && !stdout.contains("null") {
-            return Ok(SessionCheckResponse {
-                logged_in: true,
-                user: Some(SessionUser {
-                    id: "1".to_string(),
-                    email: "logged_in".to_string(),
-                    name: None,
-                }),
-            });
-        }
-        
-        Ok(SessionCheckResponse {
-            logged_in: false,
-            user: None,
-        })
-    }
-}
-
-// ============ LOGIN ============
-
-#[derive(Serialize, Deserialize)]
-pub struct LoginResponse {
-    pub success: bool,
-    pub error: Option<String>,
-    pub session_token: Option<String>,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DevicePairResponse {
+    pub ok: bool,
+    pub session_token: String,
 }
 
 #[tauri::command]
-fn login_user(email: String, password: String) -> Result<LoginResponse, String> {
+fn validate_device_session(session_token: String) -> Result<DeviceSessionCheckResponse, String> {
     let base_url = get_skills_api_base_url();
-    let url = format!("{}/api/auth/login", base_url);
-    
-    let json_body = serde_json::json!({
-        "email": email,
-        "password": password
-    });
-    
-    let json_str = json_body.to_string();
-    
-    #[cfg(target_os = "windows")]
-    {
-        // Use PowerShell to make POST request with JSON body
-        let ps_script = format!(
-            r#"$body = '{}'; 
-               try {{
-                 $response = Invoke-RestMethod -Uri '{}' -Method POST -Body $body -ContentType 'application/json' -UseBasicParsing -ErrorAction Stop
-                 $response | ConvertTo-Json -Depth 10
-               }} catch {{
-                 Write-Output '{{"error": "Network error"}}'
-               }}"#,
-            json_str.replace("'", "''"),
-            url
-        );
-        
-        let output = Command::new("powershell")
-            .args(["-NoProfile", "-Command", &ps_script])
-            .output()
-            .map_err(|e| format!("PowerShell failed: {}", e))?;
-        
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        
-        // Check for explicit error in response
-        if stdout.contains("\"error\"") {
-            // Extract error message if possible
-            return Ok(LoginResponse {
-                success: false,
-                error: Some("Invalid email or password".to_string()),
-                session_token: None,
-            });
-        }
-        
-        // Check for successful login (has "ok": true)
-        if stdout.contains("\"ok\":true") || stdout.contains("\"ok\": true") {
-            return Ok(LoginResponse {
-                success: true,
-                error: None,
-                session_token: Some("logged_in".to_string()),
-            });
-        }
-        
-        // No valid response - treat as failed
-        return Ok(LoginResponse {
-            success: false,
-            error: Some("Invalid email or password".to_string()),
-            session_token: None,
+    let url = format!("{}/api/desktop/session", base_url);
+    let client = Client::new();
+
+    let response = client
+        .get(&url)
+        .header(AUTHORIZATION, format!("Bearer {}", session_token))
+        .send()
+        .map_err(|e| format!("Failed to validate desktop session: {}", e))?;
+
+    if response.status().is_success() {
+        return Ok(DeviceSessionCheckResponse {
+            authenticated: true,
         });
     }
-    
-    #[cfg(not(target_os = "windows"))]
-    {
-        let output = Command::new("curl")
-            .args(["-s", "-L", "-X", "POST", &url, "-H", "Content-Type: application/json", "-d", &json_str])
-            .output()
-            .map_err(|e| format!("curl failed: {}", e))?;
-        
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        
-        // Check for successful login (contains user data)
-        if stdout.contains("name") || stdout.contains("email") || stdout.contains("id") {
-            return Ok(LoginResponse {
-                success: true,
-                error: None,
-                session_token: Some("logged_in".to_string()),
-            });
-        }
-        
-        return Ok(LoginResponse {
-            success: false,
-            error: Some("Invalid email or password".to_string()),
-            session_token: None,
-        });
+
+    Ok(DeviceSessionCheckResponse {
+        authenticated: false,
+    })
+}
+
+#[tauri::command]
+fn pair_device_with_code(token: String, device_name: String) -> Result<DevicePairResponse, String> {
+    let base_url = get_skills_api_base_url();
+    let url = format!("{}/api/desktop/session", base_url);
+    let client = Client::new();
+
+    let response = client
+        .post(&url)
+        .header(CONTENT_TYPE, "application/json")
+        .json(&serde_json::json!({
+            "token": token,
+            "deviceName": device_name,
+        }))
+        .send()
+        .map_err(|e| format!("Failed to link desktop app: {}", e))?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let body = response.text().unwrap_or_else(|_| "Unknown error".to_string());
+        let parsed: serde_json::Value = serde_json::from_str(&body).unwrap_or_default();
+        let message = parsed
+            .get("error")
+            .and_then(|value| value.as_str())
+            .unwrap_or(body.as_str());
+        return Err(format!("Desktop pairing failed ({}): {}", status, message));
     }
+
+    let parsed: serde_json::Value = response
+        .json()
+        .map_err(|e| format!("Invalid pairing response: {}", e))?;
+
+    let session_token = parsed
+        .get("sessionToken")
+        .and_then(|value| value.as_str())
+        .ok_or_else(|| "Desktop pairing response did not include a session token".to_string())?
+        .to_string();
+
+    Ok(DevicePairResponse {
+        ok: true,
+        session_token,
+    })
+}
+
+#[tauri::command]
+fn revoke_device_session(session_token: String) -> Result<(), String> {
+    let base_url = get_skills_api_base_url();
+    let url = format!("{}/api/desktop/session", base_url);
+    let client = Client::new();
+
+    client
+        .delete(&url)
+        .header(AUTHORIZATION, format!("Bearer {}", session_token))
+        .send()
+        .map_err(|e| format!("Failed to revoke desktop session: {}", e))?;
+
+    Ok(())
 }
 
 // ============ MAIN ============
@@ -816,9 +793,10 @@ pub fn run() {
             fetch_skills_from_api,
             fetch_skills_paginated,
             fetch_all_skills,
-            login_user,
             open_external_url,
-            check_web_session,
+            validate_device_session,
+            pair_device_with_code,
+            revoke_device_session,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -5,7 +5,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Search, Sparkles, Star } from 'lucide-react';
+import { ArrowRight, Download, Search, Sparkles, Star } from 'lucide-react';
 import { getOptionalSession } from '@/lib/session';
 import { getDirectorySkills } from '@/lib/skills';
 import { fetchSkillsDirectorySkills } from '@/lib/skills-directory';
@@ -15,18 +15,18 @@ import { GitHubIcon } from '@/components/icons/GitHubIcon';
 import { TypewriterTitle } from '@/components/TypewriterTitle';
 
 export const metadata: Metadata = {
-  title: "Universal Skills Hub - AI Agent Skills Directory for Claude Code, OpenCode, Cursor, MCP",
-  description: "Discover, search, and install reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue. Browse thousands of skills for AI coding agents like claude code, opencode, mcp skills.",
+  title: "Universal Skills Hub | Install AI Agent Skills for Claude Code, Codex, Cursor & OpenCode",
+  description: "Discover and install reusable AI agent skills for Claude Code, Codex, Cursor, OpenCode, MCP, and more. Search workflows, compare tools, and download setup-ready skills in one click.",
   keywords: [
     "AI agent skills", "Claude Code skills", "claude code", "claude id", "claude skills",
     "OpenCode skills", "open code", "opencode", "openclaw",
     "Cursor skills", "Windsurf skills", "Codex skills", 
-    "MCP skills", "mcp", "Cline skills", "Continue skills", 
-    "skills ia", "skills", "AI coding agents", "developer skills"
+    "MCP skills", "mcp", "Cline skills", "Continue skills",
+    "skills ia", "skills", "AI coding agents", "developer skills", "install skills", "one click skills"
   ],
   openGraph: {
-    title: "Universal Skills Hub - AI Agent Skills Directory",
-    description: "Discover and install reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue.",
+    title: "Universal Skills Hub | Install AI Agent Skills in One Click",
+    description: "Discover and install reusable AI agent skills for Claude Code, Codex, Cursor, OpenCode, MCP, and more.",
     type: "website",
   },
 };
@@ -94,9 +94,45 @@ export default async function Home() {
   
   // Duplicate for carousel
   const duplicatedSkills = [...skills, ...skills, ...skills];
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'What are Claude Code skills?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Claude Code skills are reusable instruction packs and workflows that extend Claude Code with focused capabilities like testing, security reviews, frontend design, deployment, and documentation.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What is MCP in this directory?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'MCP stands for Model Context Protocol. This directory helps developers discover MCP-compatible skills, prompts, and workflows that can be installed or adapted for AI coding agents.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I install skills in one click?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. Universal Skills Hub focuses on setup-ready skills with install commands, compatibility details, and quick links so you can move from discovery to installation with minimal friction.',
+        },
+      },
+    ],
+  };
 
   return (
     <main className="flex-1 text-[var(--text-primary)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
       {/* Hero Section - With Agents Carousel on right */}
       <section className="relative overflow-hidden bg-[#0B0B0B]">
         <div className="mx-auto max-w-7xl px-4 py-12 md:px-6 md:py-16">
@@ -115,7 +151,10 @@ export default async function Home() {
 
               {/* Subtitle */}
               <p className="mt-3 max-w-xl text-base text-[var(--text-secondary)] md:text-lg">
-                Search skills for Claude Code, Cursor, OpenCode, and more.
+                Find and install reusable AI agent skills for Claude Code, Codex, Cursor, OpenCode, MCP, and more.
+              </p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--text-muted)] md:text-base">
+                Search by workflow, compare compatibility, and copy setup-ready commands without digging through random repos.
               </p>
 
               {/* Search */}
@@ -137,6 +176,9 @@ export default async function Home() {
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link href="/skills" className="btn-secondary">
                   Browse skills <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/app" className="btn-secondary">
+                  Get desktop app <Download className="h-4 w-4" />
                 </Link>
                 <Link href="/submit" className="btn-secondary">
                   Submit skill <GitHubIcon className="h-4 w-4" />
@@ -185,15 +227,15 @@ export default async function Home() {
               </p>
             </div>
             <div className="text-white">
-              <h2 className="font-semibold text-lg">Multiple agents</h2>
+              <h2 className="font-semibold text-lg">One-click install paths</h2>
               <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                Works with Claude Code, Cursor, OpenCode, and more.
+                Move from discovery to installation fast with setup-ready commands and desktop linking.
               </p>
             </div>
             <div className="text-white">
-              <h2 className="font-semibold text-lg">GitHub-backed</h2>
+              <h2 className="font-semibold text-lg">Multiple agents</h2>
               <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                Skills link to repositories with installation guides.
+                Works with Claude Code, Codex, Cursor, OpenCode, MCP workflows, and more.
               </p>
             </div>
           </div>
@@ -241,6 +283,39 @@ export default async function Home() {
           {skills.slice(0, 3).map((skill) => (
             <SkillCard key={skill.id} skill={skill} redirectTo="/" />
           ))}
+        </div>
+      </section>
+
+      <section className="border-t border-white/10 bg-[#0F0F0F]">
+        <div className="mx-auto max-w-5xl px-4 py-12 md:px-6">
+          <div className="max-w-3xl">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-[var(--accent-cyan)]">Why developers search this</p>
+            <h2 className="mt-2 text-3xl font-black tracking-tight text-white">Claude skills, MCP skills, OpenCode workflows, and real install paths</h2>
+            <p className="mt-4 leading-7 text-[var(--text-secondary)]">
+              Developers searching for terms like <strong>claude skills</strong>, <strong>mcp</strong>, <strong>open code</strong>, or <strong>skills IA</strong> usually want one thing: a trustworthy place to find reusable agent workflows and install them fast. Universal Skills Hub is built to answer that directly.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+              <h3 className="text-lg font-bold text-white">What are Claude Code skills?</h3>
+              <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
+                Reusable instruction packs for Claude Code that help with testing, design systems, security, deployment, documentation, and other coding workflows.
+              </p>
+            </article>
+            <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+              <h3 className="text-lg font-bold text-white">What is MCP?</h3>
+              <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
+                MCP means Model Context Protocol. It is used to connect AI agents with structured tools, context, and workflows, and this directory helps you find compatible skills faster.
+              </p>
+            </article>
+            <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+              <h3 className="text-lg font-bold text-white">Why use the directory?</h3>
+              <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
+                Instead of browsing random repositories, you can search by intent, compare agent compatibility, and copy install commands from one focused place.
+              </p>
+            </article>
+          </div>
         </div>
       </section>
     </main>

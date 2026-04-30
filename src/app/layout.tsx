@@ -19,7 +19,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Universal Skills Hub",
-  "description": "Directory for AI agent skills - Claude Code, OpenCode, Cursor, Codex, MCP. Discover, share, and install reusable skills for AI coding agents.",
+  "description": "Install reusable AI agent skills for Claude Code, Codex, Cursor, OpenCode, MCP, and more. Search workflows, compare options, and download setup-ready skills in one click.",
   "url": SITE_URL,
   "potentialAction": {
     "@type": "SearchAction",
@@ -32,7 +32,7 @@ const jsonLd = {
   "about": {
     "@type": "Thing",
     "name": "AI Agent Skills",
-    "description": "Reusable instructions, prompts, and workflows for AI coding agents like Claude Code, OpenCode"
+    "description": "Reusable instructions, prompts, and workflows for AI coding agents like Claude Code, OpenCode, Codex, Cursor, and MCP clients."
   },
   "audience": {
     "@type": "Audience",
@@ -46,16 +46,17 @@ const jsonLd = {
   },
   "inLanguage": ["en"],
   "license": "https://github.com/xpressdev/universal-skills-hub",
-  "keywords": "AI agent skills, Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, Continue, AI coding, developer skills"
+  "keywords": "AI agent skills, Claude Code skills, OpenCode skills, Codex skills, Cursor skills, MCP skills, install skills in one click, AI coding workflows"
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Universal Skills Hub",
+    default: "Universal Skills Hub | Install AI Agent Skills for Claude Code, Codex, Cursor & OpenCode",
     template: "%s | Universal Skills Hub",
   },
-  description: "Search, compare, and publish reusable AI agent skills for Claude Code, OpenCode, Cursor, GitHub Copilot, Windsurf, Codex, Gemini CLI, Cline, Continue, and more.",
-  keywords: ["AI agent skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Codex skills", "Windsurf skills", "AI coding agents", "developer skills", "AI instructions"],
+  description: "Discover and install AI agent skills for Claude Code, Codex, Cursor, OpenCode, MCP and more. Search reusable workflows, compare tools, and download setup-ready skills in one click.",
+  keywords: ["AI agent skills", "Claude Code skills", "OpenCode skills", "Cursor skills", "MCP skills", "Codex skills", "one click skill install", "AI coding workflows", "skills ia", "claude skills"],
   authors: [{ name: "Xpress Developer" }],
   creator: "Xpress Developer",
   publisher: "Universal Skills Hub",
@@ -64,8 +65,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: SITE_URL,
     siteName: "Universal Skills Hub",
-    title: "Universal Skills Hub - AI Agent Skills Directory",
-    description: "Search and discover reusable AI agent skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, and more.",
+    title: "Universal Skills Hub | Install AI Agent Skills in One Click",
+    description: "Find and install reusable AI agent skills for Claude Code, Codex, Cursor, OpenCode, MCP, and more.",
     images: [
       {
         url: "/og-image.png",
@@ -77,8 +78,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Universal Skills Hub - AI Agent Skills Directory",
-    description: "Discover and install skills for Claude Code, OpenCode, Cursor, Windsurf, Codex, MCP, Cline, and Continue.",
+    title: "Universal Skills Hub | Install AI Agent Skills in One Click",
+    description: "Find and install skills for Claude Code, Codex, Cursor, OpenCode, MCP, and more.",
     creator: "@xpressdev",
     images: ["/og-image.png"],
   },

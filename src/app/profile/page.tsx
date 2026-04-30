@@ -4,14 +4,15 @@
 
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
 import { getPrisma } from '@/lib/prisma';
+import { getCurrentSession } from '@/lib/session';
 import { toSkill } from '@/lib/skills';
 import { SkillCard } from '@/components/SkillCard';
+import { ProfileDesktopAccessCard } from '@/components/ProfileDesktopAccessCard';
 import { User } from 'lucide-react';
 
 export default async function ProfilePage() {
-  const session = await auth();
+  const session = await getCurrentSession();
 
   if (!session?.user?.id) {
     redirect('/login?callbackUrl=/profile');
@@ -20,7 +21,7 @@ export default async function ProfilePage() {
   const userId = session.user.id;
   const prisma = getPrisma();
 
-  const [submittedSkills, favorites] = await Promise.all([
+  const [submittedSkills, favorites, desktopDevice] = await Promise.all([
     prisma.skill.findMany({
       where: { authorId: userId },
       include: {
@@ -42,6 +43,18 @@ export default async function ProfilePage() {
         },
       },
       orderBy: { createdAt: 'desc' },
+    }),
+    prisma.deviceSession.findFirst({
+      where: {
+        userId,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        deviceName: true,
+        createdAt: true,
+        expiresAt: true,
+      },
     }),
   ]);
 
@@ -78,6 +91,14 @@ export default async function ProfilePage() {
             </div>
           </div>
         </section>
+
+        <ProfileDesktopAccessCard
+          activeDevice={desktopDevice ? {
+            name: desktopDevice.deviceName,
+            createdAt: desktopDevice.createdAt.toISOString(),
+            expiresAt: desktopDevice.expiresAt.toISOString(),
+          } : null}
+        />
 
         <section className="mb-10">
           <h2 className="mb-4 text-2xl font-bold">My submitted skills</h2>

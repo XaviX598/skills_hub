@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getSessionFromCookie } from '@/lib/jwt';
+import { getCurrentSession } from '@/lib/session';
 
 export async function GET() {
-  const session = await getSessionFromCookie();
-  if (!session) {
+  const session = await getCurrentSession();
+
+  if (!session?.user?.id) {
     return NextResponse.json({ user: null });
   }
-  return NextResponse.json({ user: session });
+
+  return NextResponse.json({ user: session.user, isPremium: session.isPremium ?? false });
 }

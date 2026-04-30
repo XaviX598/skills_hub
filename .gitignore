@@ -19,11 +19,18 @@
 
 # production
 /build
+/desktop-app/dist
+/desktop-app/node_modules
+/desktop-app/src-tauri/target
 
 # misc
 .DS_Store
 *.pem
 .tmp/
+/cargo
+/.atl
+/.claude
+/.windsurf
 
 # debug
 npm-debug.log*

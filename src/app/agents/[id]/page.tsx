@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: AgentPageProps): Promise<Meta
       type: "website",
     },
     alternates: {
-      canonical: `${SITE_URL}/agents/${id}`,
+      canonical: `${SITE_URL}/agents/${resolvedId}`,
     },
   };
 }
@@ -122,6 +122,9 @@ export default async function AgentPage({ params }: AgentPageProps) {
                 Website <ExternalLink className="h-4 w-4" />
               </a>
             )}
+            <Link href={`/agents/${agent.id}/skills`} className="btn-secondary">
+              {agent.name} skills
+            </Link>
             <Link href={`/skills?agents=${agent.id}`} className="btn-secondary">
               Skills for {agent.name}
             </Link>

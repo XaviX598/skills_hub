@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Search, Terminal, Check, X, Download, Sparkles, Trash2, BookOpen, HardDrive, ChevronDown, ChevronRight, Loader2, LogOut } from 'lucide-react';
+import { Search, Terminal, Check, X, Download, Sparkles, Trash2, BookOpen, HardDrive, ChevronDown, ChevronRight, Loader2, LogOut, KeyRound, ExternalLink } from 'lucide-react';
 
 // Types matching Rust backend
 interface Agent {
@@ -253,20 +253,28 @@ export default function App() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalSkills, setTotalSkills] = useState(0);
   
-  // Login state - load from localStorage on init
+  // Login state - device session token is stored locally
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = checking
+  const [pairingCode, setPairingCode] = useState('');
+  const [pairingError, setPairingError] = useState<string | null>(null);
+  const [pairingLoading, setPairingLoading] = useState(false);
 
-  // Check for existing session on mount - try to verify with web
+  // Check for existing device session on mount
   useEffect(() => {
     const checkSession = async () => {
-      // First check localStorage
-      const savedSession = localStorage.getItem('skillshub_session');
-      
-      // Try to verify with web API
+      const savedDeviceToken = localStorage.getItem('skillshub_device_token');
+
+      if (!savedDeviceToken) {
+        setIsLoggedIn(false);
+        return;
+      }
+
       try {
-        const response = await invoke<{ logged_in: boolean }>('check_web_session');
-        if (response.logged_in) {
-          localStorage.setItem('skillshub_session', 'active');
+        const response = await invoke<{ authenticated: boolean }>('validate_device_session', {
+          sessionToken: savedDeviceToken,
+        });
+
+        if (response.authenticated) {
           setIsLoggedIn(true);
           loadAgents();
           loadSkillsPaginated(1);
@@ -274,44 +282,15 @@ export default function App() {
           return;
         }
       } catch (error) {
-        console.log('Web session check failed, using local session');
+        console.log('Device session check failed:', error);
       }
-      
-      // Fallback to local storage
-      if (savedSession === 'active') {
-        setIsLoggedIn(true);
-        loadAgents();
-        loadSkillsPaginated(1);
-        loadInstalledSkills();
-      } else {
-        setIsLoggedIn(false);
-      }
+
+      localStorage.removeItem('skillshub_device_token');
+      setIsLoggedIn(false);
     };
     
     checkSession();
   }, []);
-
-  // Poll for session while not logged in (check every 3 seconds if user signed in on web)
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      const interval = setInterval(async () => {
-        try {
-          const response = await invoke<{ logged_in: boolean }>('check_web_session');
-          if (response.logged_in) {
-            localStorage.setItem('skillshub_session', 'active');
-            setIsLoggedIn(true);
-            loadAgents();
-            loadSkillsPaginated(1);
-            loadInstalledSkills();
-          }
-        } catch (error) {
-          // Ignore errors during polling
-        }
-      }, 3000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [isLoggedIn]);
 
   // Load agents on mount
   useEffect(() => {
@@ -331,20 +310,53 @@ export default function App() {
     setFilteredSkills(result);
   }, [searchQuery, selectedCategory, skills]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('skillshub_session');
+  const handleLogout = async () => {
+    const deviceToken = localStorage.getItem('skillshub_device_token');
+
+    if (deviceToken) {
+      try {
+        await invoke('revoke_device_session', { sessionToken: deviceToken });
+      } catch (error) {
+        console.error('Failed to revoke device session:', error);
+      }
+    }
+
+    localStorage.removeItem('skillshub_device_token');
     setIsLoggedIn(false);
+    setPairingCode('');
+    setPairingError(null);
     setSkills(FALLBACK_SKILLS);
     setFilteredSkills(FALLBACK_SKILLS);
     setAgents([]);
     setInstalledSkillsList([]);
   };
 
-  const openExternalUrl = async (url: string) => {
+  const handlePairingSubmit = async () => {
+    if (!pairingCode.trim()) {
+      setPairingError('Paste the one-time token from your web profile first.');
+      return;
+    }
+
+    setPairingLoading(true);
+    setPairingError(null);
+
     try {
-      await invoke('open_external_url', { url });
+      const result = await invoke<{ ok: boolean; session_token: string }>('pair_device_with_code', {
+        token: pairingCode.trim(),
+        deviceName: 'Desktop app',
+      });
+
+      localStorage.setItem('skillshub_device_token', result.session_token);
+      setPairingCode('');
+      setIsLoggedIn(true);
+      loadAgents();
+      loadSkillsPaginated(1);
+      loadInstalledSkills();
     } catch (error) {
-      console.error('Failed to open URL:', error);
+      console.error('Device pairing failed:', error);
+      setPairingError(String(error));
+    } finally {
+      setPairingLoading(false);
     }
   };
 
@@ -360,8 +372,15 @@ export default function App() {
       console.error('Failed to detect agents:', error);
       setAgents([
         { id: 'claude-code', name: 'Claude Code', installed: true, install_path: null, skills_dir: null },
-        { id: 'cursor', name: 'Cursor', installed: false, install_path: null, skills_dir: null },
         { id: 'opencode', name: 'OpenCode', installed: false, install_path: null, skills_dir: null },
+        { id: 'cursor', name: 'Cursor', installed: false, install_path: null, skills_dir: null },
+        { id: 'windsurf', name: 'Windsurf', installed: false, install_path: null, skills_dir: null },
+        { id: 'codex', name: 'Codex', installed: false, install_path: null, skills_dir: null },
+        { id: 'github-copilot', name: 'GitHub Copilot', installed: false, install_path: null, skills_dir: null },
+        { id: 'gemini-cli', name: 'Gemini CLI', installed: false, install_path: null, skills_dir: null },
+        { id: 'cline', name: 'Cline', installed: false, install_path: null, skills_dir: null },
+        { id: 'continue', name: 'Continue', installed: false, install_path: null, skills_dir: null },
+        { id: 'mcp', name: 'MCP', installed: false, install_path: null, skills_dir: null },
       ]);
     } finally {
       setLoading(false);
@@ -655,29 +674,58 @@ export default function App() {
             
             <div className="web-login-prompt">
               <div className="web-login-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
-                </svg>
+                <KeyRound className="h-8 w-8" />
               </div>
-              <h3>Sign in on the website</h3>
-              <p>Click the button below to sign in with your account. Once signed in, you'll be automatically logged into this app.</p>
-              
-              <button 
-                type="button" 
+              <h3>Link this computer with a one-time token</h3>
+              <p>Open your profile on the website, generate a desktop token, and paste it here. Linking a new computer disconnects the previous one.</p>
+
+              <input
+                type="text"
+                value={pairingCode}
+                onChange={(event) => setPairingCode(event.target.value.toUpperCase())}
+                placeholder="USH-XXXX-XXXX-XXXX-XXXX"
+                className="token-input"
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+
+              {pairingError && <div className="login-error">{pairingError}</div>}
+
+              <button
+                type="button"
                 className="web-login-btn"
-                onClick={() => openExternalUrl('https://universal-skills-hub.vercel.app/authorize?device=desktop')}
+                disabled={pairingLoading}
+                onClick={handlePairingSubmit}
               >
-                Sign In on Website
+                {pairingLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Linking desktop...
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="h-4 w-4" />
+                    Connect desktop app
+                  </>
+                )}
               </button>
-              
-              <div className="login-status">
-                <p className="status-text">Waiting for sign in...</p>
-                <div className="loading-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
+
+              <button
+                type="button"
+                className="open-profile-btn"
+                onClick={async () => {
+                  try {
+                    await invoke('open_external_url', { url: 'https://universal-skills-hub.vercel.app/profile' });
+                  } catch (error) {
+                    console.error('Failed to open profile:', error);
+                    setPairingError('Could not open the website. Open your profile manually and generate a desktop token.');
+                  }
+                }}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open web profile
+              </button>
             </div>
             
             
@@ -791,6 +839,30 @@ export default function App() {
             height: 24px;
             color: var(--accent-cyan);
           }
+
+          .token-input {
+            width: 100%;
+            margin-top: 0.75rem;
+            padding: 0.9rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+          }
+
+          .token-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12);
+          }
+
+          .token-input::placeholder {
+            color: var(--text-muted);
+          }
           
           .web-login-prompt h3 {
             font-size: 1.125rem;
@@ -808,6 +880,11 @@ export default function App() {
           
           .web-login-btn {
             width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1rem;
             padding: 0.875rem;
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
             border: none;
@@ -823,39 +900,33 @@ export default function App() {
             transform: translateY(-1px);
             box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
           }
-          
-          .login-status {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-subtle);
+
+          .web-login-btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
           }
-          
-          .status-text {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-          }
-          
-          .loading-dots {
-            display: flex;
+
+          .open-profile-btn {
+            width: 100%;
+            margin-top: 0.75rem;
+            padding: 0.875rem;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            gap: 0.375rem;
+            gap: 0.6rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
           }
-          
-          .loading-dots span {
-            width: 6px;
-            height: 6px;
-            background: var(--accent-cyan);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-          }
-          
-          .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-          .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-          
-          @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+
+          .open-profile-btn:hover {
+            color: var(--accent-cyan);
+            border-color: rgba(0, 212, 255, 0.25);
           }
           
           .login-input {
@@ -1057,9 +1128,9 @@ export default function App() {
               <div className="panel-header">
                 <h2>
                   <Terminal className="panel-icon" />
-                  Installed Agents
+                  Supported Agents
                 </h2>
-                <span className="agent-count">{installedAgents.length} detected</span>
+                <span className="agent-count">{agents.length} listed · {installedAgents.length} detected</span>
               </div>
 
               {loading ? (

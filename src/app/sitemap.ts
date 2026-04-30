@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
-import { getDirectorySkills } from '@/lib/skills';
 import { AGENTS } from '@/data/agents';
 import { SITE_URL } from '@/lib/site-url';
+import { getPrisma } from '@/lib/prisma';
+import { FEATURED_SKILLS } from '@/data/skills';
 
 // Aliases for SEO - additional URLs that redirect to main agent pages
 const AGENT_ALIASES: Record<string, string> = {
@@ -13,7 +14,24 @@ const AGENT_ALIASES: Record<string, string> = {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { skills } = await getDirectorySkills({ limit: 1000 });
+  let skillEntries: Array<{ id: string; updatedAt: Date | string }> = [];
+
+  try {
+    const prisma = getPrisma();
+    skillEntries = await prisma.skill.findMany({
+      select: {
+        id: true,
+        updatedAt: true,
+      },
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      take: 5000,
+    });
+  } catch {
+    skillEntries = FEATURED_SKILLS.map((skill) => ({
+      id: skill.id,
+      updatedAt: skill.updatedAt,
+    }));
+  }
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -45,8 +63,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-// Skill detail pages (limit to first 500 for sitemap size)
-  const skillPages: MetadataRoute.Sitemap = skills.slice(0, 500).map((skill) => ({
+  const agentSkillLandingPages: MetadataRoute.Sitemap = AGENTS.map((agent) => ({
+    url: `${SITE_URL}/agents/${agent.id}/skills`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.75,
+  }));
+
+  // Skill detail pages (cap at 5k until a sitemap index is introduced)
+  const skillPages: MetadataRoute.Sitemap = skillEntries.map((skill) => ({
     url: `${SITE_URL}/skills/${skill.id}`,
     lastModified: skill.updatedAt ? new Date(skill.updatedAt) : new Date(),
     changeFrequency: 'weekly' as const,
@@ -61,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...agentPages, ...skillPages, ...aliasPages];
+  return [...staticPages, ...agentPages, ...agentSkillLandingPages, ...skillPages, ...aliasPages];
 }
 
 export const dynamic = 'force-dynamic';
